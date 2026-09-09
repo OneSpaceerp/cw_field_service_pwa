@@ -1,7 +1,7 @@
 // C-Water Field Service PWA - Service Worker
 // Version 1.0.0
 
-const CACHE_NAME = 'cw-field-service-v1';
+const CACHE_NAME = 'cw-field-service-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -13,6 +13,7 @@ const ASSETS_TO_CACHE = [
   './js/sync.js',
   './js/geolocation.js',
   './js/signature.js',
+  './assets/logo.png',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png'
 ];

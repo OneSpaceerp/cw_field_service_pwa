@@ -17,11 +17,8 @@
   <!-- App Header -->
   <header class="app-header">
     <div class="brand">
-      <div class="brand-icon">CW</div>
-      <div>
-        <div class="brand-title">C-Water Service</div>
-        <div class="brand-sub">Field Engineering PWA</div>
-      </div>
+      <img src="assets/logo.png" alt="C-Water Logo" class="brand-logo-img">
+      <span class="brand-tag">Field PWA</span>
     </div>
     <div class="header-status">
       <button id="sync-counter-btn" class="sync-counter-btn" style="display: none;">0 Queued</button>
@@ -39,11 +36,11 @@
 
     <!-- VIEW: LOGIN -->
     <section id="view-login" class="view-section">
-      <div class="card" style="margin-top: 40px; padding: 24px;">
+      <div class="card" style="margin-top: 30px; padding: 28px; box-shadow: var(--shadow-lg);">
         <div style="text-align: center; margin-bottom: 24px;">
-          <div class="brand-icon" style="width: 56px; height: 56px; font-size: 24px; margin: 0 auto 12px auto; border-radius: 14px;">CW</div>
-          <h2 style="font-size: 20px; font-weight: 700;">Engineer Sign In</h2>
-          <p style="font-size: 13px; color: var(--text-muted);">C-Water Field Service Management</p>
+          <img src="assets/logo.png" alt="C-Water Logo" style="height: 58px; max-width: 85%; object-fit: contain; margin: 0 auto 16px auto; display: block;">
+          <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main);">Engineer Sign In</h2>
+          <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Field Operations & Water Testing Portal</p>
         </div>
 
         <form id="login-form">
@@ -74,27 +71,27 @@
     <!-- VIEW: HOME DASHBOARD -->
     <section id="view-home" class="view-section">
       <div style="margin-bottom: 16px;">
-        <h2 id="home-greeting" style="font-size: 20px; font-weight: 700;">Welcome, Field Engineer</h2>
+        <h2 id="home-greeting" style="font-size: 22px; font-weight: 800; color: var(--text-main);">Welcome, Field Engineer</h2>
         <p style="font-size: 13px; color: var(--text-muted);">Today's operational overview</p>
       </div>
 
       <!-- KPI / Stats Grid -->
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px;">
-        <div class="card" style="padding: 12px; margin-bottom: 0;">
-          <div style="font-size: 11px; color: var(--text-muted);">SCHEDULED</div>
-          <div id="stat-scheduled" style="font-size: 24px; font-weight: 700; color: var(--info);">0</div>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 18px;">
+        <div class="stat-card stat-scheduled" onclick="App.showView('visits'); App.setVisitFilter('Scheduled');" style="cursor: pointer;">
+          <div class="stat-label">SCHEDULED</div>
+          <div id="stat-scheduled" class="stat-number">0</div>
         </div>
-        <div class="card" style="padding: 12px; margin-bottom: 0;">
-          <div style="font-size: 11px; color: var(--text-muted);">IN PROGRESS</div>
-          <div id="stat-inprogress" style="font-size: 24px; font-weight: 700; color: var(--warning);">0</div>
+        <div class="stat-card stat-inprogress" onclick="App.showView('visits'); App.setVisitFilter('In Progress');" style="cursor: pointer;">
+          <div class="stat-label">IN PROGRESS</div>
+          <div id="stat-inprogress" class="stat-number">0</div>
         </div>
-        <div class="card" style="padding: 12px; margin-bottom: 0;">
-          <div style="font-size: 11px; color: var(--text-muted);">PENDING REVIEW</div>
-          <div id="stat-pending" style="font-size: 24px; font-weight: 700; color: #a855f7;">0</div>
+        <div class="stat-card stat-pending" onclick="App.showView('visits'); App.setVisitFilter('Pending Review');" style="cursor: pointer;">
+          <div class="stat-label">PENDING REVIEW</div>
+          <div id="stat-pending" class="stat-number">0</div>
         </div>
-        <div class="card" style="padding: 12px; margin-bottom: 0;">
-          <div style="font-size: 11px; color: var(--text-muted);">COMPLETED</div>
-          <div id="stat-completed" style="font-size: 24px; font-weight: 700; color: var(--success);">0</div>
+        <div class="stat-card stat-completed" onclick="App.showView('visits'); App.setVisitFilter('Approved');" style="cursor: pointer;">
+          <div class="stat-label">COMPLETED</div>
+          <div id="stat-completed" class="stat-number">0</div>
         </div>
       </div>
 

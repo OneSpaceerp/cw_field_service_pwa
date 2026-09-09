@@ -311,9 +311,9 @@ const App = {
         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px;"><strong>Phone:</strong> ${site.primary_contact_phone || 'N/A'}</p>
         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;"><strong>Instructions:</strong> ${site.special_site_instructions || 'None'}</p>
         
-        <div style="background: #0b1120; border-radius: 8px; padding: 10px; margin-bottom: 12px; font-size: 12px;">
+        <div style="background: #f8fafc; border: 1.5px solid var(--surface-border); border-radius: 10px; padding: 12px; margin-bottom: 14px; font-size: 13px; color: var(--text-main);">
           <div><strong>Target Site GPS:</strong> ${site.latitude || '0.0'}, ${site.longitude || '0.0'}</div>
-          <div><strong>Geofence Radius:</strong> ${site.geofence_radius_meters || 200} meters</div>
+          <div style="margin-top: 4px;"><strong>Geofence Radius:</strong> ${site.geofence_radius_meters || 200} meters</div>
         </div>
 
         ${!isCheckedIn ? `
