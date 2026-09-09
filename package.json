@@ -1,0 +1,11 @@
+{
+  "name": "cw-field-service-pwa",
+  "version": "1.0.0",
+  "description": "C-Water Field Engineer Mobile Progressive Web App",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8080"
+  },
+  "author": "Nest Software Development & C-Water",
+  "license": "MIT"
+}
