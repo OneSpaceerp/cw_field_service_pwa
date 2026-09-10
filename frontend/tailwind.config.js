@@ -1,5 +1,10 @@
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const frappeUIPreset = require("frappe-ui/src/tailwind/preset.js");
+
 /** @type {import('tailwindcss').Config} */
 export default {
+	presets: [frappeUIPreset],
 	content: [
 		"./index.html",
 		"./src/**/*.{vue,js,ts,jsx,tsx}",
@@ -8,8 +13,7 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-				primary: {
-					DEFAULT: "#0284c7",
+				brand: {
 					50: "#f0f9ff",
 					100: "#e0f2fe",
 					200: "#bae6fd",
@@ -20,12 +24,6 @@ export default {
 					700: "#0369a1",
 					800: "#075985",
 					900: "#0c4a6e",
-				},
-				surface: {
-					DEFAULT: "#ffffff",
-					dark: "#0f172a",
-					muted: "#f8fafc",
-					border: "#e2e8f0",
 				},
 			},
 		},

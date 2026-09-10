@@ -1,39 +1,37 @@
 <template>
-	<span
-		class="inline-block px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide border shadow-xs"
-		:class="badgeClass"
-	>
-		{{ status }}
-	</span>
+	<Badge
+		:theme="badgeTheme"
+		:size="size"
+		:variant="variant"
+		:label="status"
+		class="font-semibold uppercase tracking-wider"
+	/>
 </template>
 
 <script setup>
 import { computed } from "vue";
+import { Badge } from "frappe-ui";
 
 const props = defineProps({
 	status: { type: String, default: "" },
+	size: { type: String, default: "md" },
+	variant: { type: String, default: "subtle" },
 });
 
-const badgeClass = computed(() => {
+const badgeTheme = computed(() => {
 	const s = (props.status || "").toLowerCase();
-	if (s.includes("scheduled")) {
-		return "bg-sky-50 text-sky-700 border-sky-200";
+	if (s.includes("scheduled") || s.includes("routine")) {
+		return "blue";
 	}
-	if (s.includes("in progress")) {
-		return "bg-amber-50 text-amber-700 border-amber-200";
+	if (s.includes("in progress") || s.includes("warning") || s.includes("medium")) {
+		return "orange";
 	}
-	if (s.includes("pending")) {
-		return "bg-purple-50 text-purple-700 border-purple-200";
+	if (s.includes("approved") || s.includes("completed") || s.includes("verified") || s.includes("pass")) {
+		return "green";
 	}
-	if (s.includes("approved") || s.includes("completed") || s.includes("verified")) {
-		return "bg-emerald-50 text-emerald-700 border-emerald-200";
+	if (s.includes("exception") || s.includes("fail") || s.includes("critical") || s.includes("urgent") || s.includes("high")) {
+		return "red";
 	}
-	if (s.includes("warning")) {
-		return "bg-amber-50 text-amber-700 border-amber-200";
-	}
-	if (s.includes("exception") || s.includes("fail") || s.includes("critical")) {
-		return "bg-rose-50 text-rose-700 border-rose-200";
-	}
-	return "bg-slate-100 text-slate-600 border-slate-200";
+	return "gray";
 });
 </script>

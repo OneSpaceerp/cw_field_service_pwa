@@ -51,7 +51,7 @@ export default defineConfig({
 		},
 	},
 	build: {
-		outDir: "../cw_field_service_pwa/public/frontend",
+		outDir: process.env.BUILD_OUT_DIR || "../cw_field_service_pwa/public/frontend",
 		emptyOutDir: true,
 		target: "es2020",
 		sourcemap: true,

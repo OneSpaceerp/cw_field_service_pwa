@@ -1,5 +1,6 @@
 import { createApp } from "vue";
 import { IonicVue } from "@ionic/vue";
+import { setConfig, frappeRequest, resourcesPlugin } from "frappe-ui";
 import App from "./App.vue";
 import router from "./router";
 
@@ -19,10 +20,14 @@ import "@ionic/vue/css/text-transformation.css";
 import "@ionic/vue/css/flex-utils.css";
 import "@ionic/vue/css/display.css";
 
-/* Tailwind and custom styling */
+/* Frappe UI Styles & Tailwind */
+import "frappe-ui/src/style.css";
 import "./main.css";
 
 const app = createApp(App);
+
+setConfig("resourceFetcher", frappeRequest);
+app.use(resourcesPlugin);
 
 app.use(IonicVue, {
 	mode: "ios",

@@ -1,18 +1,21 @@
 <template>
 	<BaseLayout :title="visit ? (visit.customer_name || visit.name) : 'Visit Details'">
 		<template #start-actions>
-			<button @click="$router.push('/visits')" class="text-sky-600 font-bold text-sm px-2">
-				&larr; Back
-			</button>
+			<Button variant="ghost" theme="gray" size="sm" @click="$router.push('/visits')">
+				<template #prefix>
+					<FeatherIcon name="chevron-left" class="w-4 h-4" />
+				</template>
+				Back
+			</Button>
 		</template>
 
 		<div v-if="visit" class="px-4 py-2 space-y-3">
 			<!-- Header Card -->
-			<div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+			<div class="bg-surface-white p-4 rounded-2xl border border-outline-gray-1 shadow-xs">
 				<div class="flex justify-between items-start mb-1">
 					<div>
-						<h2 class="text-base font-extrabold text-slate-900">{{ visit.customer_name || visit.customer }}</h2>
-						<p class="text-xs text-slate-500 mt-0.5">{{ visit.service_location }} &bull; {{ visit.name }}</p>
+						<h2 class="text-base font-extrabold text-ink-gray-9">{{ visit.customer_name || visit.customer }}</h2>
+						<p class="text-xs text-ink-gray-5 mt-0.5">{{ visit.service_location }} &bull; {{ visit.name }}</p>
 					</div>
 					<StatusBadge :status="visit.visit_status" />
 				</div>
@@ -20,185 +23,201 @@
 
 			<!-- Subtabs Bar -->
 			<div class="flex space-x-1.5 overflow-x-auto no-scrollbar py-1">
-				<button
+				<Button
 					v-for="tab in tabs"
 					:key="tab.id"
+					:variant="activeTab === tab.id ? 'solid' : 'subtle'"
+					:theme="activeTab === tab.id ? 'blue' : 'gray'"
+					size="sm"
+					class="!rounded-full whitespace-nowrap text-xs font-semibold"
 					@click="activeTab = tab.id"
-					class="px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border"
-					:class="activeTab === tab.id ? 'bg-gradient-to-r from-sky-600 to-sky-500 text-white border-transparent shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'"
 				>
 					{{ tab.label }}
-				</button>
+				</Button>
 			</div>
 
 			<!-- SUBTAB 1: SITE INFO & GPS CHECK-IN -->
 			<div v-if="activeTab === 'info'" class="space-y-3">
-				<div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-2.5">
-					<h3 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2">Site Details & Target GPS</h3>
-					<div class="text-xs space-y-1.5 text-slate-600">
-						<p><strong class="text-slate-800">Address:</strong> {{ site.address_display || "Not specified" }}</p>
-						<p><strong class="text-slate-800">Contact Person:</strong> {{ site.primary_contact_person || "N/A" }}</p>
-						<p><strong class="text-slate-800">Phone:</strong> {{ site.primary_contact_phone || "N/A" }}</p>
-						<p><strong class="text-slate-800">Safety Notes:</strong> {{ site.special_site_instructions || "Standard safety gear" }}</p>
+				<div class="bg-surface-white p-4 rounded-2xl border border-outline-gray-1 shadow-xs space-y-2.5">
+					<h3 class="text-sm font-bold text-ink-gray-9 border-b border-outline-gray-modals pb-2">Site Details & Target GPS</h3>
+					<div class="text-xs space-y-1.5 text-ink-gray-7">
+						<p><strong class="text-ink-gray-9">Address:</strong> {{ site.address_display || "Not specified" }}</p>
+						<p><strong class="text-ink-gray-9">Contact Person:</strong> {{ site.primary_contact_person || "N/A" }}</p>
+						<p><strong class="text-ink-gray-9">Phone:</strong> {{ site.primary_contact_phone || "N/A" }}</p>
+						<p><strong class="text-ink-gray-9">Safety Notes:</strong> {{ site.special_site_instructions || "Standard safety gear" }}</p>
 					</div>
 
-					<div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700">
+					<div class="p-3 bg-surface-gray-2 border border-outline-gray-modals rounded-xl text-xs text-ink-gray-7">
 						<div><strong>Site Target GPS:</strong> {{ site.latitude || "0.0" }}, {{ site.longitude || "0.0" }}</div>
 						<div class="mt-0.5"><strong>Geofence Radius:</strong> {{ site.geofence_radius_meters || 200 }} meters</div>
 					</div>
 
 					<div v-if="visit.visit_status === 'Scheduled'" class="pt-2">
-						<button
+						<Button
+							variant="solid"
+							theme="blue"
+							size="lg"
+							:loading="isCheckingIn"
+							loading-text="Acquiring GPS..."
+							class="w-full justify-center !rounded-xl !py-3 font-bold shadow-md"
 							@click="handleCheckIn"
-							:disabled="isCheckingIn"
-							class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-sky-600 to-sky-500 text-white text-xs font-bold shadow-md hover:opacity-95 active:scale-98 transition-all flex items-center justify-center space-x-2"
 						>
-							<svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-							<span>{{ isCheckingIn ? "Acquiring High-Accuracy GPS..." : "Capture GPS & Check-In" }}</span>
-						</button>
+							<template #prefix>
+								<FeatherIcon name="map-pin" class="w-4 h-4" />
+							</template>
+							Capture GPS & Check-In
+						</Button>
 					</div>
-					<div v-else class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-bold text-center">
-						Checked In on {{ visit.checkin_time || "Today" }} (GPS Verified)
+					<div v-else class="p-3 bg-surface-green-2 border border-outline-green-2 rounded-xl text-xs text-ink-green-3 font-bold text-center flex items-center justify-center gap-1.5">
+						<FeatherIcon name="check-circle" class="w-4 h-4" />
+						<span>Checked In on {{ visit.checkin_time || "Today" }} (GPS Verified)</span>
 					</div>
 				</div>
 			</div>
 
 			<!-- SUBTAB 2: WATER TESTING READINGS -->
 			<div v-if="activeTab === 'readings'" class="space-y-3">
-				<div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-					<div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
-						<div>
-							<h3 class="text-sm font-bold text-slate-900">Water Parameters</h3>
-							<p class="text-[11px] text-slate-500">Instant out-of-range bounds verification</p>
-						</div>
+				<div class="bg-surface-white p-4 rounded-2xl border border-outline-gray-1 shadow-xs space-y-3">
+					<div class="flex justify-between items-center border-b border-outline-gray-modals pb-2">
+						<h3 class="text-sm font-bold text-ink-gray-9">Field Water Parameter Tests</h3>
+						<span class="text-[11px] font-semibold text-ink-gray-5">Out-of-range flagged</span>
 					</div>
 
-					<div class="divide-y divide-slate-100">
+					<div class="space-y-2.5">
 						<ReadingRow
-							v-for="r in visit.readings"
-							:key="r.parameter"
-							:reading="r"
+							v-for="reading in visit.readings"
+							:key="reading.parameter"
+							:reading="reading"
+						/>
+					</div>
+
+					<Button
+						variant="subtle"
+						theme="blue"
+						size="sm"
+						class="w-full justify-center !rounded-xl text-xs font-semibold mt-2"
+						@click="addCustomReading"
+					>
+						<template #prefix>
+							<FeatherIcon name="plus" class="w-3.5 h-3.5" />
+						</template>
+						Add Other Parameter
+					</Button>
+				</div>
+			</div>
+
+			<!-- SUBTAB 3: SAFETY CHECKLIST -->
+			<div v-if="activeTab === 'checklist'" class="space-y-3">
+				<div class="bg-surface-white p-4 rounded-2xl border border-outline-gray-1 shadow-xs space-y-3">
+					<h3 class="text-sm font-bold text-ink-gray-9 border-b border-outline-gray-modals pb-2">Safety & Pre-Service Verification</h3>
+					<div class="space-y-2">
+						<ChecklistItem
+							v-for="item in visit.checklist_items"
+							:key="item.checklist_item"
+							:item="item"
 						/>
 					</div>
 				</div>
 			</div>
 
-			<!-- SUBTAB 3: CHECKLIST -->
-			<div v-if="activeTab === 'checklist'" class="space-y-3">
-				<div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-					<h3 class="text-sm font-bold text-slate-900 mb-3 pb-2 border-b border-slate-100">Safety & Site Protocol</h3>
-					<ChecklistItem
-						v-for="item in visit.checklist_items"
-						:key="item.item_description"
-						:item="item"
-					/>
-				</div>
-			</div>
-
 			<!-- SUBTAB 4: FINDINGS & DEFECTS -->
 			<div v-if="activeTab === 'findings'" class="space-y-3">
-				<div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-					<div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
-						<h3 class="text-sm font-bold text-slate-900">Observations & Defects</h3>
-						<button
-							@click="addFinding"
-							class="text-xs font-bold text-sky-600 bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200 hover:bg-sky-100"
-						>
-							+ Add
-						</button>
+				<div class="bg-surface-white p-4 rounded-2xl border border-outline-gray-1 shadow-xs space-y-3">
+					<div class="flex justify-between items-center border-b border-outline-gray-modals pb-2">
+						<h3 class="text-sm font-bold text-ink-gray-9">Identified Defects & Findings</h3>
+						<Button variant="subtle" theme="blue" size="sm" class="!rounded-lg text-xs" @click="addFinding">
+							<template #prefix><FeatherIcon name="plus" class="w-3 h-3" /></template>
+							Add Finding
+						</Button>
 					</div>
 
-					<div v-if="visit.findings && visit.findings.length" class="space-y-2">
+					<div v-if="visit.findings && visit.findings.length" class="space-y-2.5">
 						<div
-							v-for="(f, idx) in visit.findings"
-							:key="idx"
-							class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs"
+							v-for="(f, i) in visit.findings"
+							:key="i"
+							class="p-3 bg-surface-gray-2 rounded-xl border border-outline-gray-modals text-xs space-y-1"
 						>
-							<div class="flex justify-between items-center mb-1">
-								<span class="font-bold text-slate-800">{{ f.category }}</span>
-								<StatusBadge :status="f.severity" />
+							<div class="flex justify-between items-center">
+								<span class="font-bold text-ink-gray-9">{{ f.finding_category }}</span>
+								<StatusBadge :status="f.severity" size="sm" />
 							</div>
-							<p class="text-slate-700 font-semibold">{{ f.description }}</p>
-							<p v-if="f.corrective_action" class="text-sky-700 text-[11px] mt-1">
-								<strong>Action:</strong> {{ f.corrective_action }}
-							</p>
+							<p class="text-ink-gray-7">{{ f.finding_description }}</p>
+							<p class="text-[11px] text-ink-gray-5"><strong class="text-ink-gray-7">Action:</strong> {{ f.recommended_action }}</p>
 						</div>
 					</div>
-					<p v-else class="text-xs text-slate-400 text-center py-6">No defects or findings recorded.</p>
+					<div v-else class="text-center py-6 text-xs text-ink-gray-4">
+						No abnormal findings reported yet.
+					</div>
 				</div>
 			</div>
 
-			<!-- SUBTAB 5: REQUIREMENTS & EXPENSES -->
+			<!-- SUBTAB 5: REQUISITIONS & EXPENSES -->
 			<div v-if="activeTab === 'requirements'" class="space-y-3">
-				<div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-					<div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
-						<h3 class="text-sm font-bold text-slate-900">Chemical & Parts Requisitions</h3>
-						<button
-							@click="addRequirement"
-							class="text-xs font-bold text-sky-600 bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200 hover:bg-sky-100"
-						>
-							+ Add Item
-						</button>
+				<div class="bg-surface-white p-4 rounded-2xl border border-outline-gray-1 shadow-xs space-y-3">
+					<div class="flex justify-between items-center border-b border-outline-gray-modals pb-2">
+						<h3 class="text-sm font-bold text-ink-gray-9">Chemicals & Spare Parts</h3>
+						<Button variant="subtle" theme="blue" size="sm" class="!rounded-lg text-xs" @click="addRequirement">
+							<template #prefix><FeatherIcon name="plus" class="w-3 h-3" /></template>
+							Request Part
+						</Button>
 					</div>
 
 					<div v-if="visit.requirements && visit.requirements.length" class="space-y-2">
 						<div
-							v-for="(r, idx) in visit.requirements"
-							:key="idx"
-							class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs flex justify-between items-center"
+							v-for="(req, i) in visit.requirements"
+							:key="i"
+							class="flex justify-between items-center p-2.5 bg-surface-gray-2 rounded-xl border border-outline-gray-modals text-xs"
 						>
 							<div>
-								<span class="font-bold text-slate-800">{{ r.item_name }}</span>
-								<p class="text-slate-500 text-[11px]">{{ r.purpose }}</p>
+								<div class="font-bold text-ink-gray-9">{{ req.item_name }}</div>
+								<div class="text-[11px] text-ink-gray-5">{{ req.purpose }}</div>
 							</div>
-							<span class="font-extrabold text-sky-700 bg-sky-100 px-2.5 py-1 rounded-lg">
-								{{ r.quantity }} {{ r.unit }}
-							</span>
+							<span class="font-bold text-ink-blue-3">{{ req.quantity }} {{ req.unit }}</span>
 						</div>
 					</div>
-					<p v-else class="text-xs text-slate-400 text-center py-6">No replenishment items requested.</p>
+					<div v-else class="text-center py-6 text-xs text-ink-gray-4">
+						No chemical or spare requisitions added.
+					</div>
 				</div>
 
-				<div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-					<div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
-						<h3 class="text-sm font-bold text-slate-900">Field Expenses</h3>
-						<button
-							@click="addExpense"
-							class="text-xs font-bold text-sky-600 bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200 hover:bg-sky-100"
-						>
-							+ Add Expense
-						</button>
+				<div class="bg-surface-white p-4 rounded-2xl border border-outline-gray-1 shadow-xs space-y-3">
+					<div class="flex justify-between items-center border-b border-outline-gray-modals pb-2">
+						<h3 class="text-sm font-bold text-ink-gray-9">Incidental Expenses (SAR)</h3>
+						<Button variant="subtle" theme="gray" size="sm" class="!rounded-lg text-xs" @click="addExpense">
+							<template #prefix><FeatherIcon name="plus" class="w-3 h-3" /></template>
+							Add Expense
+						</Button>
 					</div>
 
 					<div v-if="visit.expenses && visit.expenses.length" class="space-y-2">
 						<div
-							v-for="(e, idx) in visit.expenses"
-							:key="idx"
-							class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs flex justify-between items-center"
+							v-for="(exp, i) in visit.expenses"
+							:key="i"
+							class="flex justify-between items-center p-2.5 bg-surface-gray-2 rounded-xl border border-outline-gray-modals text-xs"
 						>
 							<div>
-								<span class="font-bold text-slate-800">{{ e.expense_type }}</span>
-								<p class="text-slate-500 text-[11px]">{{ e.description }}</p>
+								<div class="font-bold text-ink-gray-9">{{ exp.expense_type }}</div>
+								<div class="text-[11px] text-ink-gray-5">{{ exp.description }}</div>
 							</div>
-							<span class="font-extrabold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-lg">
-								SAR {{ e.amount }}
-							</span>
+							<span class="font-bold text-ink-green-3">SAR {{ exp.amount.toFixed(2) }}</span>
 						</div>
 					</div>
-					<p v-else class="text-xs text-slate-400 text-center py-6">No travel or field expenses logged.</p>
+					<div v-else class="text-center py-6 text-xs text-ink-gray-4">
+						No on-site expenses recorded.
+					</div>
 				</div>
 			</div>
 
 			<!-- SUBTAB 6: SIGN & SUBMIT -->
 			<div v-if="activeTab === 'sign'" class="space-y-3">
-				<div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-					<h3 class="text-sm font-bold text-slate-900 pb-2 border-b border-slate-100">Review & Customer Sign-off</h3>
+				<div class="bg-surface-white p-4 rounded-2xl border border-outline-gray-1 shadow-xs space-y-3">
+					<h3 class="text-sm font-bold text-ink-gray-9 pb-2 border-b border-outline-gray-modals">Review & Customer Sign-off</h3>
 
 					<div>
-						<label class="block text-xs font-bold text-slate-700 mb-1">Visit Outcome</label>
+						<label class="block text-xs font-bold text-ink-gray-8 mb-1">Visit Outcome</label>
 						<select
 							v-model="visit.outcome"
-							class="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 bg-white outline-none focus:border-sky-500"
+							class="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-outline-gray-2 bg-surface-gray-2 outline-none focus:border-outline-blue-2"
 						>
 							<option value="Completed">Completed Successfully</option>
 							<option value="Partial">Partial - Follow-up Needed</option>
@@ -207,38 +226,42 @@
 					</div>
 
 					<div>
-						<label class="block text-xs font-bold text-slate-700 mb-1">Executive Summary / Observations</label>
+						<label class="block text-xs font-bold text-ink-gray-8 mb-1">Executive Summary / Observations</label>
 						<textarea
 							v-model="visit.executive_summary"
 							rows="3"
 							placeholder="Summarize site findings, water condition, and recommendations..."
-							class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white outline-none focus:border-sky-500"
+							class="w-full px-3 py-2 text-xs rounded-xl border border-outline-gray-2 bg-surface-gray-2 outline-none focus:border-outline-blue-2"
 						></textarea>
 					</div>
 
-					<div>
-						<label class="block text-xs font-bold text-slate-700 mb-1">Customer Signee Name</label>
-						<input
-							type="text"
-							v-model="visit.customer_representative"
-							placeholder="e.g. Eng. Tariq Al-Amoudi"
-							class="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 bg-white outline-none focus:border-sky-500"
-						/>
-					</div>
+					<FormControl
+						type="text"
+						label="Customer Signee Name"
+						v-model="visit.customer_representative"
+						placeholder="e.g. Eng. Tariq Al-Amoudi"
+						class="text-xs font-semibold"
+					/>
 
 					<div>
-						<label class="block text-xs font-bold text-slate-700 mb-1">Customer Digital Signature</label>
+						<label class="block text-xs font-bold text-ink-gray-8 mb-1">Customer Digital Signature</label>
 						<SignaturePad ref="sigPad" />
 					</div>
 
-					<button
+					<Button
+						variant="solid"
+						theme="green"
+						size="lg"
+						:loading="isSubmitting"
+						loading-text="Submitting Report..."
+						class="w-full justify-center !rounded-xl !py-3 font-extrabold text-sm shadow-md mt-4"
 						@click="handleSubmit"
-						:disabled="isSubmitting"
-						class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-extrabold text-sm shadow-md hover:opacity-95 active:scale-98 transition-all flex items-center justify-center space-x-2 mt-4"
 					>
-						<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-						<span>{{ isSubmitting ? "Submitting Report..." : "Complete & Submit Visit" }}</span>
-					</button>
+						<template #prefix>
+							<FeatherIcon name="check" class="w-5 h-5" />
+						</template>
+						Complete & Submit Visit
+					</Button>
 				</div>
 			</div>
 		</div>
@@ -248,6 +271,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { Button, FormControl, FeatherIcon } from "frappe-ui";
 import BaseLayout from "@/components/BaseLayout.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
 import ReadingRow from "@/components/ReadingRow.vue";
@@ -278,55 +302,79 @@ const tabs = [
 
 onMounted(async () => {
 	const visitId = route.params.id;
-	visit.value = await visitsData.getVisitDetails(visitId);
-	site.value = visit.value.site_details || {};
-	if (!visit.value.outcome) visit.value.outcome = "Completed";
+	visit.value = await visitsData.getVisit(visitId);
+	if (visit.value) {
+		site.value = await visitsData.getSiteLocation(visit.value.service_location);
+	}
 });
 
 async function handleCheckIn() {
 	isCheckingIn.value = true;
 	try {
-		const coords = await getCurrentPosition(10000);
-		const geo = evaluateGeofence(site.value.latitude, site.value.longitude, coords.latitude, coords.longitude, site.value.geofence_radius_meters || 200);
+		const pos = await getCurrentPosition();
+		const evalResult = evaluateGeofence(
+			pos.latitude,
+			pos.longitude,
+			site.value.latitude || 21.5433,
+			site.value.longitude || 39.1728,
+			site.value.geofence_radius_meters || 200
+		);
 
-		let reason = null;
-		if (geo.requiresReason) {
-			reason = prompt(`You are ${geo.distance}m away from the target site. Please enter reason for remote check-in:`);
-			if (!reason) {
-				alert("Check-in cancelled: Geofence justification required.");
-				return;
-			}
-		}
+		await visitsData.checkIn(visit.value.name, {
+			latitude: pos.latitude,
+			longitude: pos.longitude,
+			accuracy: pos.accuracy,
+			distance_meters: evalResult.distance,
+			geofence_status: evalResult.status,
+		});
 
-		await visitsData.checkIn(visit.value.name, coords, reason);
-		visit.value.visit_status = "In Progress";
-		visit.value.checkin_time = new Date().toLocaleTimeString();
-		alert("GPS Verified Check-in Recorded!");
+		alert(`Checked in successfully! Distance to target: ${evalResult.distance}m (${evalResult.status})`);
 	} catch (e) {
-		alert(e.message || "GPS check-in failed.");
+		alert("GPS Check-In failed: " + e.message);
 	} finally {
 		isCheckingIn.value = false;
 	}
 }
 
+function addCustomReading() {
+	const paramName = prompt("Enter parameter name (e.g. Free Chlorine, Turbidity):");
+	if (!paramName) return;
+	const val = prompt("Enter test value:");
+	if (val === null) return;
+
+	if (!visit.value.readings) visit.value.readings = [];
+	visit.value.readings.push({
+		parameter: paramName,
+		parameter_name: paramName,
+		reading_value: parseFloat(val) || 0,
+		unit: "ppm",
+		min_value: 0.1,
+		max_value: 5.0,
+		is_out_of_range: false,
+	});
+}
+
 function addFinding() {
-	const desc = prompt("Enter finding description:");
+	const desc = prompt("Describe the finding or defect:");
 	if (!desc) return;
-	const action = prompt("Recommended corrective action:");
+	const sev = prompt("Severity (Low, Medium, High, Critical):", "Medium");
+	const act = prompt("Recommended corrective action:", "Monitor and adjust dosing");
+
 	if (!visit.value.findings) visit.value.findings = [];
 	visit.value.findings.push({
-		category: "Scaling",
-		severity: "Medium",
-		description: desc,
-		corrective_action: action || "",
+		finding_category: "General Inspection",
+		finding_description: desc,
+		severity: sev || "Medium",
+		recommended_action: act || "",
 	});
 }
 
 function addRequirement() {
-	const item = prompt("Item / Chemical name (e.g. Anti-Scalant Polymer):");
+	const item = prompt("Item name or chemical required:");
 	if (!item) return;
-	const qty = prompt("Quantity:", "1");
-	const unit = prompt("Unit:", "Drums");
+	const qty = prompt("Quantity needed:", "1");
+	const unit = prompt("Unit of measure (Litre, Kg, Pcs):", "Litre");
+
 	if (!visit.value.requirements) visit.value.requirements = [];
 	visit.value.requirements.push({
 		item_name: item,

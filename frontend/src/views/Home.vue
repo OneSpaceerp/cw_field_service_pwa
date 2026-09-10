@@ -4,89 +4,121 @@
 
 		<div class="px-4 py-3 space-y-4">
 			<div>
-				<h2 class="text-xl font-extrabold text-slate-900">Welcome, {{ session.userFullName }}</h2>
-				<p class="text-xs text-slate-500">Today's operational field summary</p>
+				<h2 class="text-xl font-extrabold text-ink-gray-9">Welcome, {{ session.userFullName }}</h2>
+				<p class="text-xs text-ink-gray-5">Today's operational field summary</p>
 			</div>
 
 			<!-- KPI Cards Grid -->
 			<div class="grid grid-cols-2 gap-3">
 				<div
 					@click="$router.push('/visits?status=Scheduled')"
-					class="p-3.5 rounded-2xl bg-gradient-to-br from-sky-50 to-sky-100/60 border-l-4 border-l-sky-500 border border-sky-200 shadow-xs active:scale-98 transition-transform cursor-pointer"
+					class="p-3.5 rounded-2xl bg-surface-blue-1 border-l-4 border-l-surface-blue-3 border border-outline-blue-1 shadow-sm active:scale-98 transition-transform cursor-pointer"
 				>
-					<span class="text-[11px] font-bold text-sky-700 tracking-wider">SCHEDULED</span>
-					<div class="text-2xl font-extrabold text-sky-700 mt-1">{{ counts.scheduled }}</div>
+					<div class="flex items-center justify-between">
+						<span class="text-[11px] font-bold text-ink-blue-3 tracking-wider">SCHEDULED</span>
+						<FeatherIcon name="calendar" class="w-4 h-4 text-ink-blue-3" />
+					</div>
+					<div class="text-2xl font-extrabold text-ink-blue-3 mt-1.5">{{ counts.scheduled }}</div>
 				</div>
 
 				<div
 					@click="$router.push('/visits?status=In Progress')"
-					class="p-3.5 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100/60 border-l-4 border-l-amber-500 border border-amber-200 shadow-xs active:scale-98 transition-transform cursor-pointer"
+					class="p-3.5 rounded-2xl bg-surface-amber-1 border-l-4 border-l-surface-amber-3 border border-outline-amber-2 shadow-sm active:scale-98 transition-transform cursor-pointer"
 				>
-					<span class="text-[11px] font-bold text-amber-700 tracking-wider">IN PROGRESS</span>
-					<div class="text-2xl font-extrabold text-amber-700 mt-1">{{ counts.inProgress }}</div>
+					<div class="flex items-center justify-between">
+						<span class="text-[11px] font-bold text-ink-amber-3 tracking-wider">IN PROGRESS</span>
+						<FeatherIcon name="activity" class="w-4 h-4 text-ink-amber-3" />
+					</div>
+					<div class="text-2xl font-extrabold text-ink-amber-3 mt-1.5">{{ counts.inProgress }}</div>
 				</div>
 
 				<div
 					@click="$router.push('/visits?status=Pending Review')"
-					class="p-3.5 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100/60 border-l-4 border-l-purple-500 border border-purple-200 shadow-xs active:scale-98 transition-transform cursor-pointer"
+					class="p-3.5 rounded-2xl bg-purple-50 border-l-4 border-l-purple-500 border border-purple-200 shadow-sm active:scale-98 transition-transform cursor-pointer"
 				>
-					<span class="text-[11px] font-bold text-purple-700 tracking-wider">PENDING REVIEW</span>
-					<div class="text-2xl font-extrabold text-purple-700 mt-1">{{ counts.pending }}</div>
+					<div class="flex items-center justify-between">
+						<span class="text-[11px] font-bold text-purple-700 tracking-wider">PENDING REVIEW</span>
+						<FeatherIcon name="clock" class="w-4 h-4 text-purple-600" />
+					</div>
+					<div class="text-2xl font-extrabold text-purple-700 mt-1.5">{{ counts.pending }}</div>
 				</div>
 
 				<div
 					@click="$router.push('/visits?status=Approved')"
-					class="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100/60 border-l-4 border-l-emerald-500 border border-emerald-200 shadow-xs active:scale-98 transition-transform cursor-pointer"
+					class="p-3.5 rounded-2xl bg-surface-green-2 border-l-4 border-l-surface-green-3 border border-outline-green-2 shadow-sm active:scale-98 transition-transform cursor-pointer"
 				>
-					<span class="text-[11px] font-bold text-emerald-700 tracking-wider">COMPLETED</span>
-					<div class="text-2xl font-extrabold text-emerald-700 mt-1">{{ counts.completed }}</div>
+					<div class="flex items-center justify-between">
+						<span class="text-[11px] font-bold text-ink-green-3 tracking-wider">COMPLETED</span>
+						<FeatherIcon name="check-circle" class="w-4 h-4 text-ink-green-3" />
+					</div>
+					<div class="text-2xl font-extrabold text-ink-green-3 mt-1.5">{{ counts.completed }}</div>
 				</div>
 			</div>
 
 			<!-- Active / Next Assignment Spotlight -->
 			<div>
-				<h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Active / Next Assignment</h3>
-				<div v-if="nextVisit" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+				<h3 class="text-xs font-bold text-ink-gray-5 uppercase tracking-wider mb-2">Active / Next Assignment</h3>
+				<div v-if="nextVisit" class="bg-surface-white p-4 rounded-2xl border border-outline-gray-1 shadow-sm">
 					<div class="flex justify-between items-start mb-2">
 						<div>
-							<h4 class="font-bold text-slate-900 text-sm">{{ nextVisit.customer_name || nextVisit.customer }}</h4>
-							<p class="text-xs text-slate-500 mt-0.5">{{ nextVisit.service_location }}</p>
+							<h4 class="font-bold text-ink-gray-9 text-sm">{{ nextVisit.customer_name || nextVisit.customer }}</h4>
+							<p class="text-xs text-ink-gray-5 mt-0.5 flex items-center gap-1">
+								<FeatherIcon name="map-pin" class="w-3.5 h-3.5 text-ink-gray-4" />
+								<span>{{ nextVisit.service_location }}</span>
+							</p>
 						</div>
 						<StatusBadge :status="nextVisit.visit_status" />
 					</div>
 
-					<p class="text-xs text-slate-600 mb-3">
-						<span class="font-semibold">Planned:</span> {{ nextVisit.planned_date }} {{ nextVisit.planned_start_time || "" }}
+					<p class="text-xs text-ink-gray-6 mb-3 flex items-center gap-1.5">
+						<FeatherIcon name="clock" class="w-3.5 h-3.5 text-ink-gray-4" />
+						<span><strong class="font-semibold text-ink-gray-7">Planned:</strong> {{ nextVisit.planned_date }} {{ nextVisit.planned_start_time || "" }}</span>
 					</p>
 
-					<button
+					<Button
+						variant="solid"
+						theme="blue"
+						size="md"
+						class="w-full justify-center !rounded-xl !py-2.5 font-bold shadow-sm"
 						@click="$router.push(`/visits/${nextVisit.name}`)"
-						class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-sky-600 to-sky-500 text-white text-xs font-bold shadow-sm active:scale-98 transition-transform"
 					>
+						<template #prefix>
+							<FeatherIcon name="arrow-right-circle" class="w-4 h-4" />
+						</template>
 						{{ nextVisit.visit_status === "In Progress" ? "Continue Inspection" : "Start Visit & Check-In" }}
-					</button>
+					</Button>
 				</div>
-				<div v-else class="bg-white p-6 rounded-2xl border border-slate-200 text-center text-slate-400 text-xs">
+				<div v-else class="bg-surface-white p-6 rounded-2xl border border-outline-gray-1 text-center text-ink-gray-4 text-xs">
 					No active or scheduled visits for today.
 				</div>
 			</div>
 
 			<!-- Quick Actions -->
 			<div class="grid grid-cols-2 gap-3 pt-1">
-				<button
+				<Button
+					variant="subtle"
+					theme="gray"
+					size="lg"
+					class="w-full justify-center !rounded-xl !bg-surface-white !border !border-outline-gray-1 shadow-xs text-xs font-bold"
 					@click="$router.push('/visits')"
-					class="p-3 bg-white border border-slate-200 rounded-xl shadow-xs text-xs font-bold text-slate-700 flex items-center justify-center space-x-2 hover:bg-slate-50"
 				>
-					<svg class="w-4 h-4 text-sky-600" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-					<span>All Visits</span>
-				</button>
-				<button
+					<template #prefix>
+						<FeatherIcon name="list" class="w-4 h-4 text-ink-blue-2" />
+					</template>
+					All Visits
+				</Button>
+				<Button
+					variant="subtle"
+					theme="gray"
+					size="lg"
+					class="w-full justify-center !rounded-xl !bg-surface-white !border !border-outline-gray-1 shadow-xs text-xs font-bold"
 					@click="$router.push('/sync-queue')"
-					class="p-3 bg-white border border-slate-200 rounded-xl shadow-xs text-xs font-bold text-slate-700 flex items-center justify-center space-x-2 hover:bg-slate-50"
 				>
-					<svg class="w-4 h-4 text-sky-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
-					<span>Sync Queue</span>
-				</button>
+					<template #prefix>
+						<FeatherIcon name="refresh-cw" class="w-4 h-4 text-ink-blue-2" />
+					</template>
+					Sync Queue
+				</Button>
 			</div>
 		</div>
 
@@ -96,6 +128,7 @@
 
 <script setup>
 import { computed } from "vue";
+import { Button, FeatherIcon } from "frappe-ui";
 import BaseLayout from "@/components/BaseLayout.vue";
 import MobileHeader from "@/components/MobileHeader.vue";
 import BottomTabs from "@/components/BottomTabs.vue";

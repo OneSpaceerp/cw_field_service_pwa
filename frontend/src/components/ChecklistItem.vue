@@ -1,42 +1,50 @@
 <template>
-	<div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs mb-3">
-		<h4 class="text-sm font-semibold text-slate-800 mb-2">{{ item.item_description }}</h4>
+	<div class="bg-surface-white p-3.5 rounded-xl border border-outline-gray-1 shadow-xs mb-3">
+		<h4 class="text-sm font-semibold text-ink-gray-9 mb-2">{{ item.item_description }}</h4>
 		<div class="grid grid-cols-3 gap-2 mb-2.5">
-			<button
+			<Button
 				type="button"
+				:variant="item.status === 'Pass' ? 'solid' : 'subtle'"
+				theme="green"
+				size="sm"
+				class="justify-center !rounded-lg text-xs font-bold"
 				@click="setStatus('Pass')"
-				class="py-1.5 px-3 rounded-lg text-xs font-bold border transition-colors"
-				:class="item.status === 'Pass' ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'"
 			>
 				Pass
-			</button>
-			<button
+			</Button>
+			<Button
 				type="button"
+				:variant="item.status === 'Fail' ? 'solid' : 'subtle'"
+				theme="red"
+				size="sm"
+				class="justify-center !rounded-lg text-xs font-bold"
 				@click="setStatus('Fail')"
-				class="py-1.5 px-3 rounded-lg text-xs font-bold border transition-colors"
-				:class="item.status === 'Fail' ? 'bg-rose-500 text-white border-rose-600 shadow-sm' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'"
 			>
 				Fail
-			</button>
-			<button
+			</Button>
+			<Button
 				type="button"
+				:variant="item.status === 'N/A' ? 'solid' : 'subtle'"
+				theme="gray"
+				size="sm"
+				class="justify-center !rounded-lg text-xs font-bold"
 				@click="setStatus('N/A')"
-				class="py-1.5 px-3 rounded-lg text-xs font-bold border transition-colors"
-				:class="item.status === 'N/A' ? 'bg-slate-600 text-white border-slate-700 shadow-sm' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'"
 			>
 				N/A
-			</button>
+			</Button>
 		</div>
 		<input
 			type="text"
 			v-model="item.remarks"
 			placeholder="Remarks / corrective note..."
-			class="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:border-sky-500 outline-none"
+			class="w-full px-3 py-1.5 text-xs rounded-lg border border-outline-gray-2 bg-surface-gray-2 focus:bg-surface-white focus:border-outline-blue-2 outline-none"
 		/>
 	</div>
 </template>
 
 <script setup>
+import { Button } from "frappe-ui";
+
 const props = defineProps({
 	item: { type: Object, required: true },
 });

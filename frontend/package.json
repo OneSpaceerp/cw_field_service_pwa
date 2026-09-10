@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --base=/assets/cw_field_service_pwa/frontend/ && node copy-entry.js",
+    "build": "npm run build:all",
+    "build:frappe": "vite build --base=/assets/cw_field_service_pwa/frontend/ --outDir=../cw_field_service_pwa/public/frontend && node copy-entry.js",
+    "build:vercel": "vite build --base=/ --outDir=../dist",
+    "build:all": "npm run build:vercel && npm run build:frappe",
     "copy-html-entry": "node copy-entry.js"
   },
   "dependencies": {

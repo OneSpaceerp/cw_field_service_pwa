@@ -1,10 +1,11 @@
 {
   "name": "cw-field-service-pwa",
   "version": "1.0.0",
-  "description": "C-Water Field Engineer Mobile Progressive Web App",
-  "main": "index.html",
+  "description": "C-Water Mobile Field Service & Water Quality Inspection PWA",
+  "private": true,
   "scripts": {
-    "start": "python -m http.server 8080"
+    "build": "npm --prefix frontend install && npm --prefix frontend run build:all",
+    "dev": "npm --prefix frontend run dev"
   },
   "author": "Nest Software Development & C-Water",
   "license": "MIT"
