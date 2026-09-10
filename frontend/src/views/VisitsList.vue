@@ -3,18 +3,32 @@
 		<MobileHeader />
 
 		<div class="px-4 py-3 space-y-3">
-			<!-- Search Bar -->
-			<div class="relative">
-				<TextInput
-					type="search"
-					v-model="searchQuery"
-					placeholder="Search customer, site location, or ID..."
-					class="w-full text-xs"
+			<!-- Search & New Visit Bar -->
+			<div class="flex items-center space-x-2">
+				<div class="relative flex-1">
+					<TextInput
+						type="search"
+						v-model="searchQuery"
+						placeholder="Search customer, site, or ID..."
+						class="w-full text-xs"
+					>
+						<template #prefix>
+							<FeatherIcon name="search" class="w-4 h-4 text-ink-gray-4" />
+						</template>
+					</TextInput>
+				</div>
+				<Button
+					variant="solid"
+					theme="blue"
+					size="md"
+					class="!rounded-xl font-bold shadow-xs flex-shrink-0"
+					@click="showNewModal = true"
 				>
 					<template #prefix>
-						<FeatherIcon name="search" class="w-4 h-4 text-ink-gray-4" />
+						<FeatherIcon name="plus" class="w-4 h-4" />
 					</template>
-				</TextInput>
+					New Visit
+				</Button>
 			</div>
 
 			<!-- Filter Chips -->
@@ -66,28 +80,44 @@
 			<div v-else class="text-center py-12 bg-surface-white rounded-2xl border border-outline-gray-1">
 				<FeatherIcon name="inbox" class="w-10 h-10 text-ink-gray-4 mx-auto mb-2" />
 				<p class="text-sm font-semibold text-ink-gray-7">No visits found</p>
-				<p class="text-xs text-ink-gray-4 mt-1">Try changing your search or filter</p>
+				<p class="text-xs text-ink-gray-4 mt-1 mb-3">Try changing your search or schedule a new visit</p>
+				<Button
+					variant="solid"
+					theme="blue"
+					size="sm"
+					class="!rounded-xl font-bold mx-auto"
+					@click="showNewModal = true"
+				>
+					<template #prefix>
+						<FeatherIcon name="plus" class="w-3.5 h-3.5" />
+					</template>
+					Schedule New Visit
+				</Button>
 			</div>
 		</div>
 
+		<NewVisitModal v-model="showNewModal" @created="onVisitCreated" />
 		<BottomTabs />
 	</BaseLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { TextInput, Button, FeatherIcon } from "frappe-ui";
 import BaseLayout from "@/components/BaseLayout.vue";
 import MobileHeader from "@/components/MobileHeader.vue";
 import BottomTabs from "@/components/BottomTabs.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
+import NewVisitModal from "@/components/NewVisitModal.vue";
 import { visitsData } from "@/data/visits";
 
 const route = useRoute();
+const router = useRouter();
 const searchQuery = ref("");
 const activeFilter = ref("All");
 const filterChips = ["All", "Scheduled", "In Progress", "Pending Review", "Approved"];
+const showNewModal = ref(false);
 
 onMounted(() => {
 	if (route.query.status) {
@@ -115,5 +145,12 @@ const filteredVisits = computed(() => {
 
 async function refreshData() {
 	await visitsData.fetchVisits();
+}
+
+function onVisitCreated(visit) {
+	activeFilter.value = "All";
+	if (confirm(`Visit ${visit.name} created! Do you want to open and execute it now?`)) {
+		router.push(`/visits/${visit.name}`);
+	}
 }
 </script>

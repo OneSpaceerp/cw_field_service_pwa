@@ -206,6 +206,87 @@ export const visitsData = {
 		}
 		return { success: true };
 	},
+
+	async getVisit(visitId) {
+		return this.getVisitDetails(visitId);
+	},
+
+	async getSiteLocation(serviceLocation) {
+		return {
+			location_name: serviceLocation || "Main Facility",
+			site_code: "SITE-001",
+			latitude: 21.5433,
+			longitude: 39.1728,
+			geofence_radius_meters: 250,
+			address_display: "Industrial City Phase 3, Jeddah, KSA",
+			primary_contact_person: "Eng. Ahmed Al-Ghamdi",
+			primary_contact_phone: "+966 55 123 4567",
+			special_site_instructions: "Wear standard safety gear (helmet, safety glasses, steel-toe boots).",
+		};
+	},
+
+	async createVisit(data) {
+		const year = new Date().getFullYear();
+		const count = state.visits.length + 1;
+		const newId = `VISIT-${year}-${String(count).padStart(5, "0")}`;
+
+		const newVisit = {
+			name: newId,
+			customer: data.customer || "CUST-00" + count,
+			customer_name: data.customer_name || data.customer,
+			service_location: data.service_location || "On-Site Facility",
+			visit_type: data.visit_type || "Routine Inspection",
+			priority: data.priority || "Medium",
+			visit_status: "Scheduled",
+			planned_date: data.planned_date || new Date().toISOString().split("T")[0],
+			planned_start_time: data.planned_start_time || "09:00:00",
+			geofence_status: "Pending",
+			readings: [
+				{ parameter: "pH", parameter_name: "pH Level", unit: "pH", min_value: 6.5, max_value: 8.5, reading_value: "" },
+				{ parameter: "TDS", parameter_name: "Total Dissolved Solids", unit: "ppm", min_value: 100, max_value: 1000, reading_value: "" },
+				{ parameter: "Conductivity", parameter_name: "Conductivity", unit: "µS/cm", min_value: 200, max_value: 1500, reading_value: "" },
+				{ parameter: "Hardness", parameter_name: "Total Hardness", unit: "ppm CaCO3", min_value: 50, max_value: 300, reading_value: "" },
+				{ parameter: "Free Chlorine", parameter_name: "Free Chlorine", unit: "ppm", min_value: 0.2, max_value: 2.0, reading_value: "" },
+			],
+			checklist_items: [
+				{ item_description: "Visual inspection of dosing pumps and chemical lines", status: "Pass", remarks: "" },
+				{ item_description: "Verify chemical storage tank levels and spill containment", status: "Pass", remarks: "" },
+				{ item_description: "Calibrate online pH and Conductivity sensors", status: "Pass", remarks: "" },
+				{ item_description: "Check differential pressure across cartridge filters", status: "Pass", remarks: "" },
+			],
+			findings: [],
+			requirements: [],
+			expenses: [],
+		};
+
+		state.visits.unshift(newVisit);
+
+		if (!navigator.onLine) {
+			syncStore.enqueue("create_visit", newId, data);
+			return { success: true, visit: newVisit, queued: true };
+		}
+
+		try {
+			const res = await fetch("/api/method/cw_field_service.api.create_site_visit", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"X-Frappe-CSRF-Token": window.csrf_token || "",
+				},
+				body: JSON.stringify(data),
+			});
+			if (res.ok) {
+				const json = await res.json();
+				if (json.message && json.message.name) {
+					newVisit.name = json.message.name;
+				}
+			}
+		} catch (_) {
+			syncStore.enqueue("create_visit", newId, data);
+		}
+
+		return { success: true, visit: newVisit };
+	},
 };
 
 export const visitsStore = visitsData;

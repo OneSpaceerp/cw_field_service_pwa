@@ -57,7 +57,17 @@
 
 			<!-- Active / Next Assignment Spotlight -->
 			<div>
-				<h3 class="text-xs font-bold text-ink-gray-5 uppercase tracking-wider mb-2">Active / Next Assignment</h3>
+				<div class="flex items-center justify-between mb-2">
+					<h3 class="text-xs font-bold text-ink-gray-5 uppercase tracking-wider">Active / Next Assignment</h3>
+					<button
+						@click="showNewModal = true"
+						class="text-xs font-bold text-ink-blue-3 flex items-center gap-1 hover:underline"
+					>
+						<FeatherIcon name="plus" class="w-3.5 h-3.5" />
+						<span>New</span>
+					</button>
+				</div>
+
 				<div v-if="nextVisit" class="bg-surface-white p-4 rounded-2xl border border-outline-gray-1 shadow-sm">
 					<div class="flex justify-between items-start mb-2">
 						<div>
@@ -94,7 +104,19 @@
 			</div>
 
 			<!-- Quick Actions -->
-			<div class="grid grid-cols-2 gap-3 pt-1">
+			<div class="grid grid-cols-3 gap-2 pt-1">
+				<Button
+					variant="solid"
+					theme="blue"
+					size="lg"
+					class="w-full justify-center !rounded-xl text-xs font-bold shadow-xs"
+					@click="showNewModal = true"
+				>
+					<template #prefix>
+						<FeatherIcon name="plus" class="w-4 h-4" />
+					</template>
+					New Visit
+				</Button>
 				<Button
 					variant="subtle"
 					theme="gray"
@@ -122,19 +144,25 @@
 			</div>
 		</div>
 
+		<NewVisitModal v-model="showNewModal" @created="onVisitCreated" />
 		<BottomTabs />
 	</BaseLayout>
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
 import { Button, FeatherIcon } from "frappe-ui";
 import BaseLayout from "@/components/BaseLayout.vue";
 import MobileHeader from "@/components/MobileHeader.vue";
 import BottomTabs from "@/components/BottomTabs.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
+import NewVisitModal from "@/components/NewVisitModal.vue";
 import { session } from "@/data/session";
 import { visitsData } from "@/data/visits";
+
+const router = useRouter();
+const showNewModal = ref(false);
 
 const counts = computed(() => {
 	const list = visitsData.visits || [];
@@ -153,5 +181,11 @@ const nextVisit = computed(() => {
 
 async function refreshData() {
 	await visitsData.fetchVisits();
+}
+
+function onVisitCreated(visit) {
+	if (confirm(`Visit ${visit.name} scheduled! Do you want to open and execute it now?`)) {
+		router.push(`/visits/${visit.name}`);
+	}
 }
 </script>
