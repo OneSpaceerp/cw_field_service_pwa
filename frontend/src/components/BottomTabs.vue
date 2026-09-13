@@ -1,47 +1,73 @@
 <template>
-	<nav class="fixed bottom-0 inset-x-0 h-16 bg-white/95 backdrop-blur-md border-t border-slate-200 z-50 flex items-center justify-around shadow-lg">
+	<nav
+		class="fixed bottom-0 inset-x-0 bg-surface-white/95 backdrop-blur-md border-t border-outline-gray-1 z-40 flex items-center justify-around shadow-lg px-2"
+		style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); height: calc(3.75rem + env(safe-area-inset-bottom));"
+	>
+		<!-- 1. Home -->
 		<router-link
 			to="/"
-			class="flex flex-col items-center justify-center flex-1 h-full text-xs font-semibold transition-colors"
-			:class="$route.path === '/' ? 'text-sky-600' : 'text-slate-400 hover:text-slate-600'"
+			class="flex flex-col items-center justify-center flex-1 py-1 text-[11px] font-semibold transition-all rounded-xl"
+			:class="$route.path === '/' ? 'text-sky-600 font-bold' : 'text-ink-gray-5 hover:text-ink-gray-8'"
 		>
-			<svg class="w-5 h-5 mb-1" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+			<FeatherIcon name="home" class="w-5 h-5 mb-0.5" />
 			<span>Home</span>
 		</router-link>
 
+		<!-- 2. Visits List -->
 		<router-link
 			to="/visits"
-			class="flex flex-col items-center justify-center flex-1 h-full text-xs font-semibold transition-colors"
-			:class="$route.path.startsWith('/visits') ? 'text-sky-600' : 'text-slate-400 hover:text-slate-600'"
+			class="flex flex-col items-center justify-center flex-1 py-1 text-[11px] font-semibold transition-all rounded-xl"
+			:class="$route.path.startsWith('/visits') ? 'text-sky-600 font-bold' : 'text-ink-gray-5 hover:text-ink-gray-8'"
 		>
-			<svg class="w-5 h-5 mb-1" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+			<FeatherIcon name="calendar" class="w-5 h-5 mb-0.5" />
 			<span>Visits</span>
 		</router-link>
 
+		<!-- 3. Center Elevated "+ New" Action Button -->
+		<div class="flex flex-col items-center justify-center flex-1 py-1 relative">
+			<button
+				@click="emit('open-new-visit')"
+				class="w-11 h-11 -mt-4 bg-gradient-to-tr from-sky-600 to-cyan-500 text-white rounded-full shadow-md flex items-center justify-center active:scale-95 transition-transform hover:shadow-sky-500/25 ring-4 ring-white"
+				title="Schedule New Visit"
+			>
+				<FeatherIcon name="plus" class="w-6 h-6 stroke-[2.5]" />
+			</button>
+			<span class="text-[10px] font-bold text-sky-700 mt-1">Schedule</span>
+		</div>
+
+		<!-- 4. Sync Queue -->
 		<router-link
 			to="/sync-queue"
-			class="flex flex-col items-center justify-center flex-1 h-full text-xs font-semibold transition-colors relative"
-			:class="$route.path === '/sync-queue' ? 'text-sky-600' : 'text-slate-400 hover:text-slate-600'"
+			class="flex flex-col items-center justify-center flex-1 py-1 text-[11px] font-semibold transition-all rounded-xl relative"
+			:class="$route.path === '/sync-queue' ? 'text-sky-600 font-bold' : 'text-ink-gray-5 hover:text-ink-gray-8'"
 		>
-			<svg class="w-5 h-5 mb-1" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+			<div class="relative">
+				<FeatherIcon name="refresh-cw" class="w-5 h-5 mb-0.5" />
+				<span
+					v-if="syncStore.pendingCount > 0"
+					class="absolute -top-1 -right-1.5 min-w-4 h-4 px-1 bg-amber-500 text-white text-[9px] font-extrabold rounded-full flex items-center justify-center ring-2 ring-white"
+				>
+					{{ syncStore.pendingCount }}
+				</span>
+			</div>
 			<span>Sync</span>
-			<span
-				v-if="syncStore.pendingCount > 0"
-				class="absolute top-2 right-6 w-2.5 h-2.5 bg-sky-500 rounded-full ring-2 ring-white"
-			></span>
 		</router-link>
 
+		<!-- 5. Profile -->
 		<router-link
 			to="/profile"
-			class="flex flex-col items-center justify-center flex-1 h-full text-xs font-semibold transition-colors"
-			:class="$route.path === '/profile' ? 'text-sky-600' : 'text-slate-400 hover:text-slate-600'"
+			class="flex flex-col items-center justify-center flex-1 py-1 text-[11px] font-semibold transition-all rounded-xl"
+			:class="$route.path === '/profile' ? 'text-sky-600 font-bold' : 'text-ink-gray-5 hover:text-ink-gray-8'"
 		>
-			<svg class="w-5 h-5 mb-1" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+			<FeatherIcon name="user" class="w-5 h-5 mb-0.5" />
 			<span>Profile</span>
 		</router-link>
 	</nav>
 </template>
 
 <script setup>
+import { FeatherIcon } from "frappe-ui";
 import { syncStore } from "@/stores/sync";
+
+const emit = defineEmits(["open-new-visit"]);
 </script>

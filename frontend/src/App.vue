@@ -1,11 +1,10 @@
 <template>
 	<ion-app>
-		<ion-router-outlet />
-		<install-prompt />
+		<AppShell />
 	</ion-app>
 </template>
 
 <script setup>
-import { IonApp, IonRouterOutlet } from "@ionic/vue";
-import InstallPrompt from "./components/InstallPrompt.vue";
+import { IonApp } from "@ionic/vue";
+import AppShell from "@/components/AppShell.vue";
 </script>
