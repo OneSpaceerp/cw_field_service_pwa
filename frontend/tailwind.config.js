@@ -1,6 +1,7 @@
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const frappeUIPreset = require("frappe-ui/src/tailwind/preset.js");
+const colors = require("tailwindcss/colors");
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -13,6 +14,9 @@ export default {
 	theme: {
 		extend: {
 			colors: {
+				sky: colors.sky,
+				slate: colors.slate,
+				emerald: colors.emerald,
 				brand: {
 					50: "#f0f9ff",
 					100: "#e0f2fe",

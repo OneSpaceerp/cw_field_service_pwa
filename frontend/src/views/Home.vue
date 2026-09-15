@@ -1,22 +1,25 @@
 <template>
 	<div class="px-4 py-3 space-y-4 max-w-xl mx-auto">
 		<!-- 1. Engineer Shift Status & Greeting Banner -->
-		<div class="bg-gradient-to-r from-sky-800 to-cyan-700 text-white p-4 rounded-2xl shadow-sm relative overflow-hidden">
+		<div
+			class="p-4 rounded-2xl shadow-md relative overflow-hidden text-white bg-gradient-to-r from-sky-800 via-sky-700 to-cyan-700"
+			style="background: linear-gradient(135deg, #075985 0%, #0284c7 50%, #0891b2 100%);"
+		>
 			<div class="flex items-center justify-between relative z-10">
 				<div>
-					<p class="text-[11px] font-medium text-sky-200 uppercase tracking-wider">{{ currentDate }}</p>
-					<h2 class="text-lg font-extrabold mt-0.5">Welcome, {{ session.userFullName }}</h2>
+					<p class="text-[11px] font-bold text-sky-100 uppercase tracking-wider">{{ currentDate }}</p>
+					<h2 class="text-lg font-extrabold text-white mt-0.5 drop-shadow-xs">Welcome, {{ session.userFullName }}</h2>
 					<div class="flex items-center space-x-2 mt-2">
 						<span
-							class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold"
-							:class="isOnDuty ? 'bg-emerald-400/20 text-emerald-300 border border-emerald-400/40' : 'bg-slate-400/20 text-slate-300 border border-slate-400/30'"
+							class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold shadow-2xs"
+							:class="isOnDuty ? 'bg-emerald-500/30 text-emerald-100 border border-emerald-300/50' : 'bg-slate-500/30 text-slate-200 border border-slate-300/40'"
 						>
-							<span class="w-1.5 h-1.5 rounded-full mr-1.5" :class="isOnDuty ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'"></span>
+							<span class="w-1.5 h-1.5 rounded-full mr-1.5" :class="isOnDuty ? 'bg-emerald-300 animate-pulse' : 'bg-slate-300'"></span>
 							{{ isOnDuty ? "Shift Active (On Duty)" : "Off Duty" }}
 						</span>
 						<button
 							@click="toggleDuty"
-							class="text-[10px] text-sky-200 underline hover:text-white"
+							class="text-[11px] text-sky-100 underline hover:text-white font-medium drop-shadow-2xs"
 						>
 							Toggle
 						</button>
@@ -24,13 +27,13 @@
 				</div>
 
 				<div class="text-right">
-					<span class="text-[10px] text-sky-200 block">Jeddah District</span>
-					<span class="text-xs font-bold text-white block mt-0.5">Water Field Service</span>
+					<span class="text-[11px] text-sky-100 block font-medium">Jeddah District</span>
+					<span class="text-xs font-bold text-white block mt-0.5 drop-shadow-xs">Water Field Service</span>
 				</div>
 			</div>
 
 			<!-- Background decorative wave shape -->
-			<div class="absolute -bottom-8 -right-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+			<div class="absolute -bottom-8 -right-6 w-32 h-32 bg-white/15 rounded-full blur-xl pointer-events-none"></div>
 		</div>
 
 		<!-- 2. Operational KPI Cards Grid -->

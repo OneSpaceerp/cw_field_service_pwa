@@ -28,6 +28,7 @@
 			<button
 				@click="emit('open-new-visit')"
 				class="w-11 h-11 -mt-4 bg-gradient-to-tr from-sky-600 to-cyan-500 text-white rounded-full shadow-md flex items-center justify-center active:scale-95 transition-transform hover:shadow-sky-500/25 ring-4 ring-white"
+				style="background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);"
 				title="Schedule New Visit"
 			>
 				<FeatherIcon name="plus" class="w-6 h-6 stroke-[2.5]" />
