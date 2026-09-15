@@ -86,6 +86,20 @@
 			</div>
 		</div>
 
+		<!-- ERPNext Server Connection Status -->
+		<div class="bg-surface-white p-4 rounded-2xl border border-outline-gray-1 shadow-xs space-y-2">
+			<div class="flex items-center justify-between">
+				<div class="flex items-center space-x-2">
+					<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+					<h4 class="text-xs font-bold text-ink-gray-9">ERPNext Backend</h4>
+				</div>
+				<Badge theme="blue" size="sm" variant="subtle" label="Active" />
+			</div>
+			<p class="text-xs font-mono text-sky-700 bg-sky-50 px-3 py-1.5 rounded-xl border border-sky-100 break-all font-semibold">
+				{{ currentServerUrl }}
+			</p>
+		</div>
+
 		<!-- PWA App Installation -->
 		<div class="bg-surface-white p-4 rounded-2xl border border-outline-gray-1 shadow-xs space-y-3">
 			<div class="flex items-center justify-between">
@@ -125,15 +139,16 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { Avatar, Badge, Button, FeatherIcon } from "frappe-ui";
-import { session } from "@/data/session";
+import { session, getApiBaseUrl, DEFAULT_ERPNEXT_URL } from "@/data/session";
 import { visitsData } from "@/data/visits";
 import { syncStore } from "@/stores/sync";
 
 const router = useRouter();
 const isOnDuty = ref(true);
+const currentServerUrl = computed(() => getApiBaseUrl() || DEFAULT_ERPNEXT_URL);
 
 async function handleRefreshCache() {
 	try {

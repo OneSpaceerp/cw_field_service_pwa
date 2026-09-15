@@ -1,5 +1,6 @@
 import { reactive } from "vue";
 import { syncStore } from "@/stores/sync";
+import { getApiUrl, getCsrfToken } from "@/data/session";
 
 const demoVisits = [
 	{
@@ -87,11 +88,12 @@ export const visitsData = {
 
 	async fetchVisits() {
 		try {
-			const res = await fetch("/api/method/cw_field_service.api.get_assigned_visits", {
+			const res = await fetch(getApiUrl("/api/method/cw_field_service.api.get_assigned_visits"), {
 				method: "POST",
+				credentials: "include",
 				headers: {
 					"Content-Type": "application/json",
-					"X-Frappe-CSRF-Token": window.csrf_token || "",
+					"X-Frappe-CSRF-Token": getCsrfToken(),
 				},
 			});
 			if (res.ok) {
@@ -166,11 +168,12 @@ export const visitsData = {
 		}
 
 		try {
-			await fetch("/api/method/cw_field_service.api.check_in_visit", {
+			await fetch(getApiUrl("/api/method/cw_field_service.api.check_in_visit"), {
 				method: "POST",
+				credentials: "include",
 				headers: {
 					"Content-Type": "application/json",
-					"X-Frappe-CSRF-Token": window.csrf_token || "",
+					"X-Frappe-CSRF-Token": getCsrfToken(),
 				},
 				body: JSON.stringify({ visit_id: visitId, ...payload }),
 			});
@@ -193,11 +196,12 @@ export const visitsData = {
 		}
 
 		try {
-			await fetch("/api/method/cw_field_service.api.submit_visit", {
+			await fetch(getApiUrl("/api/method/cw_field_service.api.submit_visit"), {
 				method: "POST",
+				credentials: "include",
 				headers: {
 					"Content-Type": "application/json",
-					"X-Frappe-CSRF-Token": window.csrf_token || "",
+					"X-Frappe-CSRF-Token": getCsrfToken(),
 				},
 				body: JSON.stringify({ visit_id: visitId, ...submission }),
 			});
@@ -267,11 +271,12 @@ export const visitsData = {
 		}
 
 		try {
-			const res = await fetch("/api/method/cw_field_service.api.create_site_visit", {
+			const res = await fetch(getApiUrl("/api/method/cw_field_service.api.create_site_visit"), {
 				method: "POST",
+				credentials: "include",
 				headers: {
 					"Content-Type": "application/json",
-					"X-Frappe-CSRF-Token": window.csrf_token || "",
+					"X-Frappe-CSRF-Token": getCsrfToken(),
 				},
 				body: JSON.stringify(data),
 			});
