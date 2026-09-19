@@ -1,5 +1,5 @@
 <template>
-	<div class="px-4 py-3 space-y-3 max-w-xl mx-auto">
+	<div class="px-4 py-3 space-y-3 max-w-xl mx-auto pb-6">
 		<!-- Search & New Visit Top Bar -->
 		<div class="flex items-center space-x-2">
 			<div class="relative flex-1">

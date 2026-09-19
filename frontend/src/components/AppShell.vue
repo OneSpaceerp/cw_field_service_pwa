@@ -8,14 +8,21 @@
 
 		<!-- Main Page Router View -->
 		<main
-			class="flex-1 overflow-y-auto"
-			:class="{ 'pb-20': showChrome }"
+			class="flex-1 overflow-y-auto min-h-0"
 		>
 			<router-view v-slot="{ Component }">
 				<transition name="fade" mode="out-in">
 					<component :is="Component" />
 				</transition>
 			</router-view>
+
+			<!-- Bottom Navigation Clearance Spacer: Guarantees the last line of content is never hidden behind the fixed bottom nav -->
+			<div
+				v-if="showChrome"
+				class="w-full shrink-0 pointer-events-none"
+				style="height: calc(5.5rem + env(safe-area-inset-bottom, 24px));"
+				aria-hidden="true"
+			/>
 		</main>
 
 		<!-- Bottom 5-Tab Navigation -->

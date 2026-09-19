@@ -1,5 +1,5 @@
 <template>
-	<div class="px-4 py-3 space-y-4 max-w-xl mx-auto pb-24">
+	<div class="px-4 py-3 space-y-3 max-w-xl mx-auto pb-6">
 		<!-- Top Status Header Card -->
 		<div class="bg-surface-white p-4 rounded-2xl border border-outline-gray-1 shadow-xs space-y-3">
 			<div class="flex items-center justify-between">

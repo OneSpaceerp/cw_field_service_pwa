@@ -32,7 +32,7 @@
 		</header>
 
 		<!-- Content -->
-		<div class="p-4 space-y-3 max-w-xl mx-auto">
+		<div class="p-4 space-y-3 max-w-xl mx-auto pb-6">
 			<div
 				v-for="item in notificationsStore.items"
 				:key="item.id"

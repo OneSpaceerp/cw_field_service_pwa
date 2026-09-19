@@ -1,5 +1,5 @@
 <template>
-	<div class="px-4 py-3 space-y-4 max-w-xl mx-auto">
+	<div class="px-4 py-3 space-y-4 max-w-xl mx-auto pb-6">
 		<!-- 1. Engineer Shift Status & Greeting Banner -->
 		<div
 			class="p-4 rounded-2xl shadow-md relative overflow-hidden text-white bg-gradient-to-r from-sky-800 via-sky-700 to-cyan-700"
