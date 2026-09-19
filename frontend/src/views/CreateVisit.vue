@@ -1,5 +1,5 @@
 <template>
-	<div class="max-w-xl mx-auto px-4 py-4 space-y-4 pb-28">
+	<div class="max-w-xl mx-auto px-4 py-4 space-y-4" style="padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 24px));">
 		<!-- Top Bar: Back button and Page Title matching Mockup -->
 		<div class="flex items-center space-x-3 pt-1 pb-2">
 			<button
@@ -303,8 +303,8 @@
 
 		<!-- Bottom Floating Action Bar -->
 		<div
-			class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 z-30 shadow-lg"
-			style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));"
+			class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 z-40 shadow-xl"
+			style="padding-bottom: max(1rem, env(safe-area-inset-bottom, 16px));"
 		>
 			<div class="max-w-xl mx-auto flex items-center gap-3">
 				<button
@@ -528,8 +528,8 @@ async function handleCreate() {
 		validationError.value = "Please select a visit type.";
 		return;
 	}
-	if (!form.description.trim() || form.description.trim().length < 5) {
-		validationError.value = "Please enter a description for this visit (min 5 characters).";
+	if (!form.description.trim()) {
+		validationError.value = "Please enter a description for this visit.";
 		return;
 	}
 	if (!photoPreview.value) {

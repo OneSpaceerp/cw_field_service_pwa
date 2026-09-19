@@ -22,6 +22,7 @@ const routes = [
 		path: "/visits/create",
 		name: "CreateVisit",
 		component: () => import("@/views/CreateVisit.vue"),
+		meta: { hideBottomTabs: true },
 	},
 	{
 		path: "/visits/:id",

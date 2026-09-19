@@ -18,6 +18,7 @@ export default defineConfig(({ command, mode }) => {
 		: "/manifest/manifest-icon-512.maskable.png";
 
 	return {
+		root: __dirname,
 		server: {
 			port: 8080,
 			proxy: getProxyOptions(),

@@ -18,7 +18,7 @@
 
 			<!-- Bottom Navigation Clearance Spacer: Guarantees the last line of content is never hidden behind the fixed bottom nav -->
 			<div
-				v-if="showChrome"
+				v-if="showChrome && !route.meta.hideBottomTabs"
 				class="w-full shrink-0 pointer-events-none"
 				style="height: calc(5.5rem + env(safe-area-inset-bottom, 24px));"
 				aria-hidden="true"
@@ -27,7 +27,7 @@
 
 		<!-- Bottom 5-Tab Navigation -->
 		<BottomTabs
-			v-if="showChrome"
+			v-if="showChrome && !route.meta.hideBottomTabs"
 			@open-new-visit="showNewVisitModal = true"
 		/>
 
