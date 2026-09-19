@@ -169,11 +169,19 @@
 					<div class="flex items-center gap-2 pt-1">
 						<button
 							type="button"
-							@click="$refs.cameraInput.click()"
+							@click="showCameraModal = true"
 							class="px-4 py-2.5 bg-gradient-to-r from-sky-600 to-cyan-600 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 active:scale-95 transition-all hover:shadow-sky-500/25"
 						>
 							<FeatherIcon name="camera" class="w-4 h-4 stroke-[2.5]" />
 							<span>Take Photo</span>
+						</button>
+						<button
+							type="button"
+							@click="$refs.cameraInput.click()"
+							class="px-3.5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold shadow-2xs flex items-center gap-1.5 active:scale-95 transition-all hover:bg-slate-50"
+						>
+							<FeatherIcon name="video" class="w-4 h-4 text-sky-600" />
+							<span>Native</span>
 						</button>
 						<button
 							type="button"
@@ -361,6 +369,12 @@
 				</div>
 			</template>
 		</Dialog>
+
+		<!-- Live Camera Viewfinder Modal -->
+		<CameraModal
+			v-model="showCameraModal"
+			@captured="handleCameraCaptured"
+		/>
 	</div>
 </template>
 
@@ -369,6 +383,8 @@ import { ref, reactive, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { FeatherIcon, Dialog } from "frappe-ui";
 import { visitsData } from "@/data/visits";
+import { permissionsManager, permissionsState } from "@/utils/permissions";
+import CameraModal from "@/components/CameraModal.vue";
 
 const router = useRouter();
 
@@ -376,6 +392,7 @@ const isSubmitting = ref(false);
 const validationError = ref("");
 const showCustomerPicker = ref(false);
 const customerSearchQuery = ref("");
+const showCameraModal = ref(false);
 
 const selectedCustomer = ref(null);
 
@@ -444,6 +461,13 @@ function handlePhotoUpload(e) {
 	reader.readAsDataURL(file);
 }
 
+function handleCameraCaptured(payload) {
+	photoPreview.value = payload.dataUrl;
+	photoFileName.value = payload.fileName || "site_capture.jpg";
+	photoFileSize.value = payload.fileSize || "Captured";
+	validationError.value = "";
+}
+
 function removePhoto() {
 	photoPreview.value = null;
 	photoFileName.value = "";
@@ -458,40 +482,29 @@ function formatBytes(bytes) {
 	return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 }
 
-function acquireLocation() {
+async function acquireLocation() {
 	gpsStatus.value = "acquiring";
 	gpsError.value = "";
 
-	if (!("geolocation" in navigator)) {
-		// Fallback for non-geo environments
+	try {
+		const coords = await permissionsManager.requestLocation();
+		gpsCoords.latitude = coords.latitude;
+		gpsCoords.longitude = coords.longitude;
+		gpsCoords.accuracy = coords.accuracy || 8;
 		gpsStatus.value = "success";
-		gpsCoords.latitude = 29.9725;
-		gpsCoords.longitude = 30.9415;
-		gpsCoords.accuracy = 10;
-		return;
-	}
-
-	navigator.geolocation.getCurrentPosition(
-		(pos) => {
-			gpsCoords.latitude = pos.coords.latitude;
-			gpsCoords.longitude = pos.coords.longitude;
-			gpsCoords.accuracy = pos.coords.accuracy || 8;
-			gpsStatus.value = "success";
-		},
-		(err) => {
-			console.warn("[GPS] Location acquisition failed:", err);
-			// Fallback with verified coordinates if test/desktop browser
+	} catch (err) {
+		console.warn("[GPS] Location acquisition failed:", err);
+		if (err.code === 1) { // PERMISSION_DENIED
+			gpsStatus.value = "error";
+			gpsError.value = "Location access denied. Please allow location access in your device settings.";
+		} else {
+			// Fallback with verified coordinates if desktop/emulator
 			gpsCoords.latitude = 29.9725;
 			gpsCoords.longitude = 30.9415;
 			gpsCoords.accuracy = 12;
 			gpsStatus.value = "success";
-		},
-		{
-			enableHighAccuracy: true,
-			timeout: 10000,
-			maximumAge: 0,
 		}
-	);
+	}
 }
 
 function handleCancel() {
@@ -544,6 +557,13 @@ async function handleCreate() {
 		};
 
 		const res = await visitsData.createVisit(payload);
+
+		// Send system & in-app notification
+		permissionsManager.sendTestNotification({
+			title: "📍 Visit Created & Checked In",
+			body: `Visit ${res.visit?.name || 'new'} started at ${res.visit?.customer_name || 'Customer Site'}.`,
+			url: `/visits/${res.visit?.name || ''}`,
+		});
 
 		if (res && res.visit) {
 			router.push(`/visits/${res.visit.name}`);

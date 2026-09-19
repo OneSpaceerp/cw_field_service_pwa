@@ -38,17 +38,72 @@ self.addEventListener("message", (event) => {
 	if (event.data && event.data.type === "SKIP_WAITING") {
 		self.skipWaiting();
 	}
+	if (event.data && event.data.type === "SHOW_NOTIFICATION") {
+		const { title, options } = event.data.payload || {};
+		self.registration.showNotification(title || "C-Water Field Service", {
+			icon: "/manifest/manifest-icon-192.maskable.png",
+			badge: "/manifest/manifest-icon-192.maskable.png",
+			vibrate: [100, 50, 100],
+			...options,
+		});
+	}
 });
 
 self.addEventListener("activate", () => {
 	clientsClaim();
 });
 
-// 5. Push Notification click handling
+// 5. Background Push Notification Handling (Web Push / FCM)
+self.addEventListener("push", (event) => {
+	let payload = {
+		title: "C-Water Field Service",
+		body: "You have an update on your scheduled visits.",
+		icon: "/manifest/manifest-icon-192.maskable.png",
+		badge: "/manifest/manifest-icon-192.maskable.png",
+		data: { url: "/visits" },
+		tag: "cw-notification",
+		vibrate: [100, 50, 100],
+	};
+
+	if (event.data) {
+		try {
+			const json = event.data.json();
+			payload = { ...payload, ...json };
+		} catch (_) {
+			payload.body = event.data.text() || payload.body;
+		}
+	}
+
+	event.waitUntil(
+		self.registration.showNotification(payload.title, {
+			body: payload.body,
+			icon: payload.icon || "/manifest/manifest-icon-192.maskable.png",
+			badge: payload.badge || "/manifest/manifest-icon-192.maskable.png",
+			vibrate: payload.vibrate || [100, 50, 100],
+			data: payload.data || { url: "/visits" },
+			tag: payload.tag || "cw-notification",
+			renotify: true,
+		})
+	);
+});
+
+// 6. Push Notification click handling (focus existing window or open target URL)
 self.addEventListener("notificationclick", (event) => {
 	event.stopImmediatePropagation();
 	event.notification.close();
-	if (event.notification.data && event.notification.data.url) {
-		event.waitUntil(clients.openWindow(event.notification.data.url));
-	}
+	const targetUrl = event.notification.data?.url || "/visits";
+
+	event.waitUntil(
+		clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+			for (let client of windowClients) {
+				if (client.url && client.url.includes(self.location.origin) && "focus" in client) {
+					client.navigate(targetUrl);
+					return client.focus();
+				}
+			}
+			if (clients.openWindow) {
+				return clients.openWindow(targetUrl);
+			}
+		})
+	);
 });

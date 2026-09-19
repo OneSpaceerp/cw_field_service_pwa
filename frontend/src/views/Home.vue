@@ -36,6 +36,36 @@
 			<div class="absolute -bottom-8 -right-6 w-32 h-32 bg-white/15 rounded-full blur-xl pointer-events-none"></div>
 		</div>
 
+		<!-- Device Permissions Prompt Banner (if any permission is ungranted) -->
+		<div
+			v-if="!permissionsManager.allGranted && !isPermissionsDismissed"
+			class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 shadow-2xs flex items-center justify-between gap-3 text-xs"
+		>
+			<div class="flex items-center space-x-2.5 overflow-hidden">
+				<div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+					<FeatherIcon name="shield" class="w-4 h-4 stroke-[2.5]" />
+				</div>
+				<div class="truncate">
+					<h4 class="font-bold text-amber-950 truncate">Device Permissions Needed</h4>
+					<p class="text-[11px] text-amber-800 truncate">Enable GPS, Camera, and Notifications for field ops</p>
+				</div>
+			</div>
+			<div class="flex items-center gap-1.5 shrink-0">
+				<button
+					@click="$router.push('/profile')"
+					class="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold active:scale-95 transition-all shadow-2xs"
+				>
+					Setup
+				</button>
+				<button
+					@click="isPermissionsDismissed = true"
+					class="p-1 text-amber-600 hover:text-amber-800"
+				>
+					<FeatherIcon name="x" class="w-3.5 h-3.5" />
+				</button>
+			</div>
+		</div>
+
 		<!-- 2. Operational KPI Cards Grid -->
 		<div>
 			<div class="flex items-center justify-between mb-2">
@@ -251,7 +281,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { Button, FeatherIcon } from "frappe-ui";
 import StatusBadge from "@/components/StatusBadge.vue";
@@ -259,10 +289,16 @@ import NewVisitModal from "@/components/NewVisitModal.vue";
 import { session } from "@/data/session";
 import { visitsData } from "@/data/visits";
 import { syncStore } from "@/stores/sync";
+import { permissionsManager } from "@/utils/permissions";
 
 const router = useRouter();
 const showNewModal = ref(false);
 const isOnDuty = ref(true);
+const isPermissionsDismissed = ref(false);
+
+onMounted(() => {
+	permissionsManager.checkAll();
+});
 
 const currentDate = computed(() => {
 	const now = new Date();

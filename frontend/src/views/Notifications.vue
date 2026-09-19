@@ -33,6 +33,71 @@
 
 		<!-- Content -->
 		<div class="p-4 space-y-3 max-w-xl mx-auto pb-6">
+			<!-- Device Push Notification Banner -->
+			<div
+				class="p-3.5 rounded-2xl border shadow-2xs space-y-2.5 transition-all"
+				:class="permState.notifications === 'granted' ? 'border-emerald-200 bg-emerald-50/40' : 'border-sky-200 bg-sky-50/40'"
+			>
+				<div class="flex items-center justify-between">
+					<div class="flex items-center space-x-2.5">
+						<div
+							class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
+							:class="permState.notifications === 'granted' ? 'bg-emerald-100 text-emerald-700' : 'bg-sky-100 text-sky-700'"
+						>
+							<FeatherIcon name="bell" class="w-3.5 h-3.5" />
+						</div>
+						<div>
+							<h4 class="text-xs font-bold text-slate-900">Device Push Alerts</h4>
+							<p class="text-[11px] text-slate-500">
+								{{ permState.notifications === 'granted' ? 'System notifications are active' : 'Enable lock screen & dispatch alerts' }}
+							</p>
+						</div>
+					</div>
+
+					<span
+						v-if="permState.notifications === 'granted'"
+						class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full"
+					>
+						Active
+					</span>
+					<span
+						v-else-if="permState.notifications === 'requires_install'"
+						class="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full"
+					>
+						iOS Home Screen Required
+					</span>
+					<span
+						v-else
+						class="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full"
+					>
+						Action Needed
+					</span>
+				</div>
+
+				<div class="flex items-center gap-2 pt-0.5">
+					<button
+						v-if="permState.notifications !== 'granted' && permState.notifications !== 'requires_install'"
+						type="button"
+						@click="enableNotifications"
+						:disabled="isEnabling"
+						class="flex-1 py-2 px-3 bg-sky-600 hover:bg-sky-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all"
+					>
+						<FeatherIcon name="bell" class="w-3.5 h-3.5" />
+						<span>{{ isEnabling ? 'Enabling...' : 'Enable Notifications' }}</span>
+					</button>
+
+					<button
+						type="button"
+						@click="testNotification"
+						class="py-2 px-3 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 active:scale-95 rounded-xl text-xs font-bold shadow-2xs flex items-center justify-center gap-1.5 transition-all"
+						:class="permState.notifications === 'granted' ? 'w-full' : ''"
+					>
+						<FeatherIcon name="send" class="w-3.5 h-3.5 text-sky-600" />
+						<span>Send Test Alert</span>
+					</button>
+				</div>
+			</div>
+
 			<div
 				v-for="item in notificationsStore.items"
 				:key="item.id"
@@ -104,11 +169,34 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { Button, FeatherIcon } from "frappe-ui";
 import { notificationsStore } from "@/data/notifications";
+import { permissionsManager, permissionsState } from "@/utils/permissions";
 
 const router = useRouter();
+const permState = permissionsState;
+const isEnabling = ref(false);
+
+async function enableNotifications() {
+	isEnabling.value = true;
+	try {
+		await permissionsManager.requestNotifications();
+	} catch (e) {
+		alert(e.message || "Failed to enable notifications.");
+	} finally {
+		isEnabling.value = false;
+	}
+}
+
+async function testNotification() {
+	await permissionsManager.sendTestNotification({
+		title: "C-Water Field Service Alert",
+		body: "Test notification: Technician dispatch alerts are operating normally.",
+		url: "/notifications",
+	});
+}
 
 function handleNotificationClick(item) {
 	notificationsStore.markAsRead(item.id);
@@ -116,4 +204,8 @@ function handleNotificationClick(item) {
 		router.push(`/visits/${item.visit_id}`);
 	}
 }
+
+onMounted(() => {
+	permissionsManager.checkNotifications();
+});
 </script>

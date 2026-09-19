@@ -100,6 +100,9 @@
 			</p>
 		</div>
 
+		<!-- Hardware Permissions & System Notifications -->
+		<PermissionsCard />
+
 		<!-- PWA App Installation -->
 		<div class="bg-surface-white p-4 rounded-2xl border border-outline-gray-1 shadow-xs space-y-3">
 			<div class="flex items-center justify-between">
@@ -145,6 +148,7 @@ import { Avatar, Badge, Button, FeatherIcon } from "frappe-ui";
 import { session, getApiBaseUrl, DEFAULT_ERPNEXT_URL } from "@/data/session";
 import { visitsData } from "@/data/visits";
 import { syncStore } from "@/stores/sync";
+import PermissionsCard from "@/components/PermissionsCard.vue";
 
 const router = useRouter();
 const isOnDuty = ref(true);
