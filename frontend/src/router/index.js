@@ -39,6 +39,10 @@ const routes = [
 		component: () => import("@/views/Notifications.vue"),
 	},
 	{
+		path: "/cw_field_service_pwa",
+		redirect: "/",
+	},
+	{
 		path: "/:pathMatch(.*)*",
 		redirect: "/",
 	},

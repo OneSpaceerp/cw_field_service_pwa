@@ -1,7 +1,6 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "cleanUrls": true,
   "rewrites": [
     {
       "source": "/api/:match*",
@@ -10,6 +9,14 @@
     {
       "source": "/files/:match*",
       "destination": "https://onespace.cw-eg.com/files/:match*"
+    },
+    {
+      "source": "/cw_field_service_pwa/:match*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/cw_field_service_pwa",
+      "destination": "/index.html"
     },
     {
       "source": "/(.*)",
