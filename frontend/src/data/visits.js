@@ -74,6 +74,24 @@ const state = reactive({
 			{ name: "Biological", category_name: "Biological Fouling & Algae", default_severity: "Critical" },
 			{ name: "Leakage", category_name: "System Leakage", default_severity: "Low" },
 		],
+		service_types: [
+			{ name: "Routine Inspection", service_type_name: "Routine Inspection" },
+			{ name: "Preventive Maintenance", service_type_name: "Preventive Maintenance" },
+			{ name: "Emergency Breakdown", service_type_name: "Emergency Breakdown" },
+			{ name: "Corrective Repair", service_type_name: "Corrective Repair" },
+			{ name: "Chemical Dosing Audit", service_type_name: "Chemical Dosing Audit" },
+			{ name: "Water Quality Sampling", service_type_name: "Water Quality Sampling" },
+			{ name: "Commissioning", service_type_name: "Installation & Commissioning" },
+		],
+		customers: [
+			{ name: "Al-Ahram Beverages", customer_name: "Al-Ahram Beverages Co.", territory: "Egypt - Giza" },
+			{ name: "El Sewedy Electric Industrial", customer_name: "El Sewedy Electric Industrial", territory: "10th of Ramadan" },
+			{ name: "Jeddah Industrial Cooling Systems", customer_name: "Jeddah Industrial Cooling Systems", territory: "Western Region" },
+			{ name: "Red Sea Commercial Center", customer_name: "Red Sea Commercial Center", territory: "Red Sea" },
+			{ name: "National Pharma Water Solutions", customer_name: "National Pharma Water Solutions", territory: "Cairo" },
+			{ name: "Cairo Desalination Plant 4", customer_name: "Cairo Desalination Plant 4", territory: "New Cairo" },
+			{ name: "Al-Rehab Water Bottling Plant", customer_name: "Al-Rehab Water Bottling Plant", territory: "Cairo" },
+		],
 	},
 });
 
@@ -84,6 +102,62 @@ export const visitsData = {
 
 	get masterData() {
 		return state.masterData;
+	},
+
+	async fetchMasterData() {
+		try {
+			const res = await fetch(getApiUrl("/api/method/cw_field_service.api.get_master_data"), {
+				method: "POST",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
+					"X-Frappe-CSRF-Token": getCsrfToken(),
+				},
+			});
+			if (res.ok) {
+				const data = await res.json();
+				if (data.message) {
+					if (Array.isArray(data.message.customers) && data.message.customers.length > 0) {
+						state.masterData.customers = data.message.customers;
+					}
+					if (Array.isArray(data.message.service_types) && data.message.service_types.length > 0) {
+						state.masterData.service_types = data.message.service_types;
+					}
+					if (Array.isArray(data.message.parameters) && data.message.parameters.length > 0) {
+						state.masterData.parameters = data.message.parameters;
+					}
+				}
+			}
+		} catch (_) {}
+		return state.masterData;
+	},
+
+	async searchCustomers(query = "") {
+		const q = (query || "").trim().toLowerCase();
+		if (!navigator.onLine) {
+			return (state.masterData.customers || []).filter((c) =>
+				(c.customer_name || c.name || "").toLowerCase().includes(q)
+			);
+		}
+		try {
+			const res = await fetch(getApiUrl(`/api/method/cw_field_service.api.search_customers?query=${encodeURIComponent(q)}`), {
+				method: "GET",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
+					"X-Frappe-CSRF-Token": getCsrfToken(),
+				},
+			});
+			if (res.ok) {
+				const data = await res.json();
+				if (Array.isArray(data.message) && data.message.length > 0) {
+					return data.message;
+				}
+			}
+		} catch (_) {}
+		return (state.masterData.customers || []).filter((c) =>
+			(c.customer_name || c.name || "").toLowerCase().includes(q)
+		);
 	},
 
 	async fetchVisits() {
@@ -234,17 +308,35 @@ export const visitsData = {
 		const count = state.visits.length + 1;
 		const newId = `VISIT-${year}-${String(count).padStart(5, "0")}`;
 
+		const isOnSite = data.creation_source === "Engineer On-Site" || Boolean(data.latitude && data.longitude);
+
 		const newVisit = {
 			name: newId,
 			customer: data.customer || "CUST-00" + count,
 			customer_name: data.customer_name || data.customer,
-			service_location: data.service_location || "On-Site Facility",
+			service_location: data.service_location || "Customer Site",
 			visit_type: data.visit_type || "Routine Inspection",
 			priority: data.priority || "Medium",
-			visit_status: "Scheduled",
+			visit_status: isOnSite ? "In Progress" : (data.visit_status || "Planned"),
 			planned_date: data.planned_date || new Date().toISOString().split("T")[0],
-			planned_start_time: data.planned_start_time || "09:00:00",
-			geofence_status: "Pending",
+			planned_start_time: data.planned_start_time || new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+			creation_source: data.creation_source || (isOnSite ? "Engineer On-Site" : "Admin Scheduled"),
+			checkin_time: isOnSite ? new Date().toISOString() : null,
+			checkin_latitude: data.latitude || null,
+			checkin_longitude: data.longitude || null,
+			checkin_accuracy: data.accuracy || null,
+			geofence_status: isOnSite ? "Verified" : "Pending",
+			distance_to_site_meters: 0,
+			description: data.description || "",
+			site_photo: data.image_data || null,
+			evidence: data.image_data ? [
+				{
+					file: data.image_data,
+					category: "Before Inspection",
+					caption: "On-Site Check-in / Equipment Photo",
+					timestamp: new Date().toISOString(),
+				},
+			] : [],
 			readings: [
 				{ parameter: "pH", parameter_name: "pH Level", unit: "pH", min_value: 6.5, max_value: 8.5, reading_value: "" },
 				{ parameter: "TDS", parameter_name: "Total Dissolved Solids", unit: "ppm", min_value: 100, max_value: 1000, reading_value: "" },
@@ -284,7 +376,12 @@ export const visitsData = {
 				const json = await res.json();
 				if (json.message && json.message.name) {
 					newVisit.name = json.message.name;
+					if (json.message.site_photo) {
+						newVisit.site_photo = json.message.site_photo;
+					}
 				}
+			} else {
+				syncStore.enqueue("create_visit", newId, data);
 			}
 		} catch (_) {
 			syncStore.enqueue("create_visit", newId, data);

@@ -25,15 +25,15 @@
 
 		<!-- 3. Center Elevated "+ New" Action Button -->
 		<div class="flex flex-col items-center justify-center flex-1 py-1 relative">
-			<button
-				@click="emit('open-new-visit')"
+			<router-link
+				to="/visits/create"
 				class="w-11 h-11 -mt-4 bg-gradient-to-tr from-sky-600 to-cyan-500 text-white rounded-full shadow-md flex items-center justify-center active:scale-95 transition-transform hover:shadow-sky-500/25 ring-4 ring-white"
 				style="background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);"
-				title="Schedule New Visit"
+				title="Create On-Site Visit"
 			>
 				<FeatherIcon name="plus" class="w-6 h-6 stroke-[2.5]" />
-			</button>
-			<span class="text-[10px] font-bold text-sky-700 mt-1">Schedule</span>
+			</router-link>
+			<span class="text-[10px] font-bold text-sky-700 mt-1">Visit</span>
 		</div>
 
 		<!-- 4. Sync Queue -->

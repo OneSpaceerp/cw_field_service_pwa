@@ -20,7 +20,7 @@
 				theme="blue"
 				size="md"
 				class="!rounded-xl font-bold shadow-xs flex-shrink-0 flex items-center gap-1.5"
-				@click="showNewModal = true"
+				@click="$router.push('/visits/create')"
 			>
 				<template #prefix>
 					<FeatherIcon name="plus" class="w-4 h-4 stroke-[2.5]" />
