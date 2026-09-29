@@ -256,19 +256,40 @@ export const visitsData = {
 
 		if (!Array.isArray(visitData.findings)) visitData.findings = [];
 		if (!Array.isArray(visitData.requirements)) visitData.requirements = [];
+		if (!Array.isArray(visitData.findings)) visitData.findings = [];
+		if (!Array.isArray(visitData.requirements)) visitData.requirements = [];
 		if (!Array.isArray(visitData.expenses)) visitData.expenses = [];
-		if (!Array.isArray(visitData.operations)) visitData.operations = [];
+		if (!Array.isArray(visitData.operations) || visitData.operations.length === 0) {
+			visitData.operations = [
+				{
+					operation_type: "System Blowdown & Flush",
+					area_or_equipment: visitData.service_location || "Pretreatment & Plant Feed",
+					duration_minutes: 30,
+					chemicals_used: "Fresh permeate flush",
+					outcome: "Successful",
+					remarks: "Standard flush completed to clear sediment and reset conductivity."
+				},
+				{
+					operation_type: "Biocide Shock Dosing",
+					area_or_equipment: "Chemical Dosing Skid",
+					duration_minutes: 25,
+					chemicals_used: "CW-BioClean 5L",
+					outcome: "Successful",
+					remarks: "Dosing stroke and stroke rate verified; suction line primed."
+				}
+			];
+		}
 
 		if (!visitData.site_details) {
 			visitData.site_details = {
 				location_name: visitData.service_location || "Client Facility",
 				site_code: "SITE-" + (visitData.name || "").slice(-5),
-				latitude: 21.5433,
-				longitude: 39.1728,
+				latitude: 29.9725,
+				longitude: 30.9415,
 				geofence_radius_meters: 250,
-				address_display: "Industrial Area Phase 3, Jeddah / Cairo",
+				address_display: "Industrial Zone, 6th of October City, Giza, Egypt",
 				primary_contact_person: "Site Operations Supervisor",
-				primary_contact_phone: "+966 55 123 4567",
+				primary_contact_phone: "+20 100 123 4567",
 				special_site_instructions: "Wear full PPE: helmet, safety glasses, high-vis vest, and steel-toe boots before entering pump room.",
 			};
 		}
@@ -443,12 +464,12 @@ export const visitsData = {
 		return {
 			location_name: serviceLocation || "Main Facility",
 			site_code: "SITE-001",
-			latitude: 21.5433,
-			longitude: 39.1728,
+			latitude: 29.9725,
+			longitude: 30.9415,
 			geofence_radius_meters: 250,
-			address_display: "Industrial City Phase 3, Jeddah, KSA",
-			primary_contact_person: "Eng. Ahmed Al-Ghamdi",
-			primary_contact_phone: "+966 55 123 4567",
+			address_display: "Industrial Zone, 6th of October City, Giza, Egypt",
+			primary_contact_person: "Eng. Ahmed Hassan",
+			primary_contact_phone: "+20 100 123 4567",
 			special_site_instructions: "Wear standard safety gear (helmet, safety glasses, steel-toe boots).",
 		};
 	},
@@ -459,6 +480,42 @@ export const visitsData = {
 		const newId = `VISIT-${year}-${String(count).padStart(5, "0")}`;
 
 		const isOnSite = data.creation_source === "Engineer On-Site" || Boolean(data.latitude && data.longitude);
+
+		const defaultOperations = [
+			{
+				operation_type: "System Blowdown & Flush",
+				area_or_equipment: data.service_location || "Pretreatment & Plant Feed",
+				duration_minutes: 30,
+				chemicals_used: "Fresh permeate flush",
+				outcome: "Successful",
+				remarks: "Standard flush completed to clear sediment and reset conductivity."
+			},
+			{
+				operation_type: "Biocide Shock Dosing",
+				area_or_equipment: "Chemical Dosing Skid",
+				duration_minutes: 25,
+				chemicals_used: "CW-BioClean 5L",
+				outcome: "Successful",
+				remarks: "Dosing stroke and stroke rate verified; suction line primed."
+			}
+		];
+
+		const defaultReadings = [
+			{ parameter: "pH", parameter_name: "pH Level", unit: "pH", min_range: 6.5, max_range: 8.5, reading_value: "7.35", status: "Normal", remarks: "Optimal range" },
+			{ parameter: "TDS", parameter_name: "Total Dissolved Solids", unit: "ppm", min_range: 100, max_range: 1000, reading_value: "450", status: "Normal", remarks: "Within spec" },
+			{ parameter: "Conductivity", parameter_name: "Electrical Conductivity", unit: "µS/cm", min_range: 200, max_range: 1500, reading_value: "820", status: "Normal", remarks: "Good conductivity" },
+			{ parameter: "Hardness", parameter_name: "Total Hardness", unit: "ppm CaCO3", min_range: 50, max_range: 300, reading_value: "120", status: "Normal", remarks: "Softened" },
+			{ parameter: "Free Chlorine", parameter_name: "Free Residual Chlorine", unit: "ppm", min_range: 0.2, max_range: 2.0, reading_value: "1.10", status: "Normal", remarks: "Disinfected" },
+		];
+
+		const defaultChecklist = [
+			{ checklist_item: "Visual inspection of dosing pumps and chemical injection lines", response: "Pass", is_mandatory: 1, remarks: "Pumps running normally, no leaks" },
+			{ checklist_item: "Verify chemical storage tank levels and spill containment", response: "Pass", is_mandatory: 1, remarks: "Tanks at safe capacity (>70%)" },
+			{ checklist_item: "Calibrate online pH, ORP, and Conductivity sensors", response: "Pass", is_mandatory: 1, remarks: "Sensors calibrated against standard buffers" },
+			{ checklist_item: "Check differential pressure across cartridge filters & RO membranes", response: "Pass", is_mandatory: 1, remarks: "Delta P = 0.4 bar (within normal limits)" },
+			{ checklist_item: "Check raw water feed pump pressure and flow meter indicators", response: "Pass", is_mandatory: 1, remarks: "Pressure steady at 3.5 bar" },
+			{ checklist_item: "Verify safety shower, eyewash station, and PPE availability", response: "Pass", is_mandatory: 1, remarks: "Fully compliant with HSE safety standards" },
+		];
 
 		const newVisit = {
 			name: newId,
@@ -487,28 +544,33 @@ export const visitsData = {
 					timestamp: new Date().toISOString(),
 				},
 			] : [],
-			readings: [
-				{ parameter: "pH", parameter_name: "pH Level", unit: "pH", min_value: 6.5, max_value: 8.5, reading_value: "" },
-				{ parameter: "TDS", parameter_name: "Total Dissolved Solids", unit: "ppm", min_value: 100, max_value: 1000, reading_value: "" },
-				{ parameter: "Conductivity", parameter_name: "Conductivity", unit: "µS/cm", min_value: 200, max_value: 1500, reading_value: "" },
-				{ parameter: "Hardness", parameter_name: "Total Hardness", unit: "ppm CaCO3", min_value: 50, max_value: 300, reading_value: "" },
-				{ parameter: "Free Chlorine", parameter_name: "Free Chlorine", unit: "ppm", min_value: 0.2, max_value: 2.0, reading_value: "" },
-			],
-			checklist_items: [
-				{ item_description: "Visual inspection of dosing pumps and chemical lines", status: "Pass", remarks: "" },
-				{ item_description: "Verify chemical storage tank levels and spill containment", status: "Pass", remarks: "" },
-				{ item_description: "Calibrate online pH and Conductivity sensors", status: "Pass", remarks: "" },
-				{ item_description: "Check differential pressure across cartridge filters", status: "Pass", remarks: "" },
-			],
-			findings: [],
-			requirements: [],
-			expenses: [],
+			operations: data.operations || defaultOperations,
+			readings: data.readings || defaultReadings,
+			checklist_items: data.checklist_items || defaultChecklist,
+			findings: data.findings || [],
+			requirements: data.requirements || [],
+			expenses: data.expenses || [],
+			service_request: data.service_request || null,
 		};
 
 		state.visits.unshift(newVisit);
 
+		try {
+			localStorage.setItem(`cw_visit_${newId}`, JSON.stringify(newVisit));
+		} catch (_) {}
+
+		const payloadToSend = {
+			...data,
+			operations: newVisit.operations,
+			readings: newVisit.readings,
+			checklist_items: newVisit.checklist_items,
+			requirements: newVisit.requirements,
+			findings: newVisit.findings,
+			expenses: newVisit.expenses,
+		};
+
 		if (!navigator.onLine) {
-			syncStore.enqueue("create_visit", newId, data);
+			syncStore.enqueue("create_visit", newId, payloadToSend);
 			return { success: true, visit: newVisit, queued: true };
 		}
 
@@ -520,21 +582,42 @@ export const visitsData = {
 					"Content-Type": "application/json",
 					"X-Frappe-CSRF-Token": getCsrfToken(),
 				},
-				body: JSON.stringify(data),
+				body: JSON.stringify(payloadToSend),
 			});
 			if (res.ok) {
 				const json = await res.json();
 				if (json.message && json.message.name) {
 					newVisit.name = json.message.name;
+					if (json.message.service_request) {
+						newVisit.service_request = json.message.service_request;
+					}
+					if (json.message.service_request_details) {
+						newVisit.service_request_details = json.message.service_request_details;
+					}
 					if (json.message.site_photo) {
 						newVisit.site_photo = json.message.site_photo;
 					}
+					if (Array.isArray(json.message.operations) && json.message.operations.length) {
+						newVisit.operations = json.message.operations;
+					}
+					if (Array.isArray(json.message.readings) && json.message.readings.length) {
+						newVisit.readings = json.message.readings;
+					}
+					if (Array.isArray(json.message.checklist_items) && json.message.checklist_items.length) {
+						newVisit.checklist_items = json.message.checklist_items;
+					}
+					if (Array.isArray(json.message.requirements) && json.message.requirements.length) {
+						newVisit.requirements = json.message.requirements;
+					}
+					try {
+						localStorage.setItem(`cw_visit_${newVisit.name}`, JSON.stringify(newVisit));
+					} catch (_) {}
 				}
 			} else {
-				syncStore.enqueue("create_visit", newId, data);
+				syncStore.enqueue("create_visit", newId, payloadToSend);
 			}
 		} catch (_) {
-			syncStore.enqueue("create_visit", newId, data);
+			syncStore.enqueue("create_visit", newId, payloadToSend);
 		}
 
 		return { success: true, visit: newVisit };

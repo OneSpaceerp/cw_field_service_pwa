@@ -37,7 +37,7 @@
 						type="text"
 						label="Service Location / Equipment Site *"
 						v-model="form.service_location"
-						placeholder="e.g. RO Unit Station 1 - Jeddah"
+						placeholder="e.g. RO Unit Station 1 - 6th of October City, Giza"
 						required
 						class="text-xs"
 					/>
@@ -201,7 +201,7 @@ const photoFileName = ref("");
 const customerSuggestions = [
 	"Al-Ahram Beverages",
 	"El Sewedy Electric Industrial",
-	"Jeddah Industrial Cooling Systems",
+	"6th of October Industrial Water Systems",
 	"Red Sea Commercial Center",
 	"National Pharma Water Solutions",
 ];

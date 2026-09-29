@@ -294,6 +294,22 @@
 				</p>
 			</div>
 
+			<!-- 7. ERPNext Backend Integration Card -->
+			<div class="rounded-2xl border border-sky-100 bg-sky-50/50 p-3.5 space-y-2 text-xs">
+				<div class="flex items-center justify-between">
+					<div class="flex items-center space-x-2 text-sky-900 font-extrabold">
+						<FeatherIcon name="cpu" class="w-4 h-4 text-sky-600" />
+						<span>ERPNext Integration & Working Steps</span>
+					</div>
+					<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-sky-100 text-sky-800">
+						Auto-Linked
+					</span>
+				</div>
+				<p class="text-[11px] text-slate-600 leading-snug">
+					Upon creation, this visit is recorded in ERPNext as <strong>In Progress</strong> with an auto-linked <strong>CW Service Request</strong>, initial <strong>Working Steps</strong> (flush & chemical dosing), <strong>Water Quality Tests</strong>, and <strong>Checklist</strong>.
+				</p>
+			</div>
+
 			<!-- Error Alert -->
 			<div v-if="validationError" class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs font-bold text-rose-700 flex items-center gap-2">
 				<FeatherIcon name="alert-circle" class="w-4 h-4 shrink-0 stroke-[2.5]" />

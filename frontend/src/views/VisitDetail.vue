@@ -126,7 +126,29 @@
 							<FeatherIcon name="phone-call" class="w-3.5 h-3.5" />
 							<span>{{ siteDetails.primary_contact_phone }}</span>
 						</a>
-						<span v-else class="font-bold text-slate-800">+966 50 123 4567</span>
+						<span v-else class="font-bold text-slate-800">+20 100 123 4567</span>
+					</div>
+				</div>
+
+				<!-- Linked ERPNext Service Request -->
+				<div v-if="visit.service_request" class="pt-2 border-t border-slate-100">
+					<div class="p-3 bg-sky-50/70 border border-sky-200 rounded-xl flex items-center justify-between">
+						<div>
+							<div class="flex items-center gap-1.5">
+								<FeatherIcon name="file-text" class="w-4 h-4 text-sky-700" />
+								<span class="text-xs font-bold text-sky-900">Linked Service Request:</span>
+								<span class="font-mono text-xs font-extrabold text-sky-800">{{ visit.service_request }}</span>
+							</div>
+							<p v-if="visit.service_request_details?.issue_description" class="text-[11px] text-slate-600 mt-1 line-clamp-1">
+								{{ visit.service_request_details.issue_description }}
+							</p>
+						</div>
+						<span
+							class="text-[10px] font-extrabold px-2 py-0.5 rounded-full shrink-0"
+							:class="visit.service_request_details?.status === 'Resolved' ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-200 text-sky-900'"
+						>
+							{{ visit.service_request_details?.status || 'In Progress' }}
+						</span>
 					</div>
 				</div>
 
@@ -331,6 +353,102 @@
 		</div>
 
 		<!-- ========================================== -->
+		<!-- SUBTAB: WORKING STEPS & OPERATIONS LOG    -->
+		<!-- ========================================== -->
+		<div v-if="activeTab === 'operations'" class="space-y-3">
+			<div class="bg-surface-white p-4 rounded-2xl border border-outline-gray-1 shadow-xs space-y-3">
+				<div class="flex justify-between items-center border-b border-outline-gray-1 pb-2">
+					<div>
+						<h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Working Steps & Operations Log</h3>
+						<p class="text-[11px] text-slate-500 font-medium">Record descaling, chemical dosing, washing, blowdown & actions</p>
+					</div>
+					<Button
+						variant="solid"
+						theme="blue"
+						size="sm"
+						class="!rounded-xl !text-xs font-bold"
+						@click="showAddOperationModal = true"
+					>
+						<template #prefix>
+							<FeatherIcon name="plus" class="w-3.5 h-3.5" />
+						</template>
+						Add Step
+					</Button>
+				</div>
+
+				<div v-if="visit.operations && visit.operations.length" class="space-y-3">
+					<div
+						v-for="(op, idx) in visit.operations"
+						:key="idx"
+						class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 space-y-2 text-xs"
+					>
+						<div class="flex items-start justify-between gap-2">
+							<div>
+								<div class="flex items-center gap-2">
+									<span class="w-5 h-5 rounded-full bg-sky-100 text-sky-700 font-extrabold text-[11px] flex items-center justify-center">
+										{{ idx + 1 }}
+									</span>
+									<h4 class="font-extrabold text-slate-900 text-sm">{{ op.operation_type }}</h4>
+								</div>
+								<p class="text-[11px] text-slate-600 font-semibold mt-0.5 ml-7">
+									Unit / Area: {{ op.area_or_equipment || 'Main System' }}
+								</p>
+							</div>
+							<div class="flex items-center gap-1.5 shrink-0">
+								<span
+									class="px-2 py-0.5 rounded-md text-[10px] font-extrabold"
+									:class="{
+										'bg-emerald-100 text-emerald-800': op.outcome === 'Successful',
+										'bg-amber-100 text-amber-800': op.outcome === 'Partially Successful',
+										'bg-orange-100 text-orange-800': op.outcome === 'Incomplete',
+										'bg-rose-100 text-rose-800': op.outcome === 'Failed',
+									}"
+								>
+									{{ op.outcome || 'Successful' }}
+								</span>
+								<span v-if="op.duration_minutes" class="text-[10px] font-bold text-slate-500 bg-slate-200 px-1.5 py-0.5 rounded">
+									{{ op.duration_minutes }} min
+								</span>
+								<button
+									type="button"
+									@click="removeOperation(idx)"
+									class="text-slate-400 hover:text-rose-600 p-1"
+									title="Delete working step"
+								>
+									<FeatherIcon name="trash-2" class="w-3.5 h-3.5" />
+								</button>
+							</div>
+						</div>
+
+						<div v-if="op.chemicals_used" class="bg-white p-2 rounded-lg border border-slate-200 text-[11px] ml-7">
+							<span class="font-bold text-slate-700">Chemicals / Agents Used:</span>
+							<p class="text-slate-600 mt-0.5">{{ op.chemicals_used }}</p>
+						</div>
+
+						<div v-if="op.remarks" class="text-[11px] text-slate-600 ml-7">
+							<span class="font-bold text-slate-700">Remarks:</span> {{ op.remarks }}
+						</div>
+					</div>
+				</div>
+
+				<div v-else class="text-center py-6 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 p-4">
+					<FeatherIcon name="tool" class="w-8 h-8 text-slate-400 mx-auto mb-1 stroke-[1.5]" />
+					<p class="text-xs font-bold text-slate-700">No Working Steps Logged</p>
+					<p class="text-[11px] text-slate-400 mb-2">Record operations such as blowdown, washing, or descaling performed during the visit.</p>
+					<Button
+						variant="subtle"
+						theme="blue"
+						size="sm"
+						class="!rounded-xl !text-xs font-bold"
+						@click="showAddOperationModal = true"
+					>
+						+ Add First Step
+					</Button>
+				</div>
+			</div>
+		</div>
+
+		<!-- ========================================== -->
 		<!-- SUBTAB 5: EQUIPMENT DEFECT FINDINGS        -->
 		<!-- ========================================== -->
 		<div v-if="activeTab === 'findings'" class="space-y-3">
@@ -472,7 +590,7 @@
 				<div class="flex justify-between items-center border-b border-outline-gray-1 pb-2">
 					<div>
 						<h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Field Expenses</h3>
-						<p class="text-[11px] text-slate-500 font-medium">Total: {{ totalExpenses.toFixed(2) }} EGP / SAR</p>
+						<p class="text-[11px] text-slate-500 font-medium">Total: {{ totalExpenses.toFixed(2) }} EGP</p>
 					</div>
 					<Button
 						variant="ghost"
@@ -496,7 +614,7 @@
 							<p class="text-[11px] text-slate-500">{{ exp.remarks || 'Out-of-pocket' }}</p>
 						</div>
 						<div class="flex items-center gap-2">
-							<span class="font-extrabold text-slate-900">{{ parseFloat(exp.amount || 0).toFixed(2) }}</span>
+							<span class="font-extrabold text-slate-900">{{ parseFloat(exp.amount || 0).toFixed(2) }} EGP</span>
 							<button
 								type="button"
 								@click="removeExpense(idx)"
@@ -522,10 +640,12 @@
 						v-model="visit.outcome"
 						class="w-full px-3 py-2.5 text-xs font-bold rounded-xl border border-slate-200 bg-slate-50 text-slate-900 outline-none focus:border-sky-500"
 					>
-						<option value="Completed">Completed Successfully</option>
-						<option value="Partially Completed">Partially Completed (Follow-up Required)</option>
-						<option value="Breakdown Resolved">Breakdown Resolved & Recommissioned</option>
-						<option value="Incomplete">Incomplete (Client Facility Closed)</option>
+						<option value="Resolved">Resolved / Completed Successfully</option>
+						<option value="Partially Resolved">Partially Resolved (Follow-up Required)</option>
+						<option value="Follow-up Required">Follow-up Required</option>
+						<option value="Not Resolved">Not Resolved / Breakdown Unresolved</option>
+						<option value="Customer Unavailable">Customer Unavailable</option>
+						<option value="Cancelled">Cancelled</option>
 					</select>
 				</div>
 
@@ -892,12 +1012,12 @@
 					</div>
 
 					<div>
-						<label class="block text-xs font-bold text-slate-700 mb-1">Amount (EGP / SAR) *</label>
+						<label class="block text-xs font-bold text-slate-700 mb-1">Amount (EGP) *</label>
 						<input
 							type="number"
 							step="0.01"
 							v-model="newExpense.amount"
-							placeholder="0.00"
+							placeholder="0.00 EGP"
 							required
 							class="w-full px-3 py-2 text-xs font-bold rounded-xl border border-slate-200"
 						/>
@@ -919,6 +1039,104 @@
 						</Button>
 						<Button variant="solid" theme="blue" size="sm" type="submit">
 							Save Expense
+						</Button>
+					</div>
+				</form>
+			</template>
+		</Dialog>
+
+		<!-- ========================================== -->
+		<!-- MODAL: ADD WORKING STEP / OPERATION        -->
+		<!-- ========================================== -->
+		<Dialog
+			:options="{ title: 'Add Working Step / Operation', size: 'md' }"
+			v-model="showAddOperationModal"
+		>
+			<template #body-content>
+				<form @submit.prevent="handleAddOperationSubmit" class="space-y-3 pt-2">
+					<div>
+						<label class="block text-xs font-bold text-slate-700 mb-1">Operation Type *</label>
+						<select
+							v-model="newOperation.operation_type"
+							class="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 bg-slate-50"
+							required
+						>
+							<option value="Acid Descaling">Acid Descaling (Dissolving scale & hardness)</option>
+							<option value="Alkaline Boilout / Degreasing">Alkaline Boilout / Degreasing (Oils & organic cleaning)</option>
+							<option value="Basin Pressure Washing">Basin Pressure Washing (Cooling tower / sump wash)</option>
+							<option value="Biocide Shock Dosing">Biocide Shock Dosing (Microbiological slug dose)</option>
+							<option value="System Blowdown & Flush">System Blowdown & Flush (Conductivity reset & drain)</option>
+							<option value="Membrane Cleaning (CIP)">Membrane Cleaning (CIP) (RO clean-in-place)</option>
+							<option value="Filter Backwash & Media Flush">Filter Backwash & Media Flush (Sand / Multimedia filter)</option>
+							<option value="Dosing Pump Priming & Calibration">Dosing Pump Priming & Calibration</option>
+							<option value="General Preventive Maintenance">General Preventive Maintenance</option>
+						</select>
+					</div>
+
+					<div class="grid grid-cols-2 gap-2">
+						<div>
+							<label class="block text-xs font-bold text-slate-700 mb-1">Area / Equipment Unit *</label>
+							<input
+								type="text"
+								v-model="newOperation.area_or_equipment"
+								placeholder="e.g. RO Unit 01, Cooling Tower A"
+								required
+								class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200"
+							/>
+						</div>
+						<div>
+							<label class="block text-xs font-bold text-slate-700 mb-1">Duration (Minutes)</label>
+							<input
+								type="number"
+								min="5"
+								step="5"
+								v-model="newOperation.duration_minutes"
+								placeholder="30"
+								class="w-full px-3 py-2 text-xs font-bold rounded-xl border border-slate-200"
+							/>
+						</div>
+					</div>
+
+					<div>
+						<label class="block text-xs font-bold text-slate-700 mb-1">Chemicals & Dosing Agents Used</label>
+						<input
+							type="text"
+							v-model="newOperation.chemicals_used"
+							placeholder="e.g. Scale Inhibitor CW-300 20L, Sodium Bisulfite 5kg"
+							class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200"
+						/>
+					</div>
+
+					<div>
+						<label class="block text-xs font-bold text-slate-700 mb-1">Execution Outcome *</label>
+						<select
+							v-model="newOperation.outcome"
+							class="w-full px-3 py-2 text-xs font-bold rounded-xl border border-slate-200 bg-slate-50"
+							required
+						>
+							<option value="Successful">Successful</option>
+							<option value="Partially Successful">Partially Successful</option>
+							<option value="Incomplete">Incomplete</option>
+							<option value="Failed">Failed</option>
+						</select>
+					</div>
+
+					<div>
+						<label class="block text-xs font-bold text-slate-700 mb-1">Operational Remarks</label>
+						<textarea
+							v-model="newOperation.remarks"
+							rows="2"
+							placeholder="Notes on differential pressure drop, water clarity after blowdown, pump response..."
+							class="w-full p-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50"
+						></textarea>
+					</div>
+
+					<div class="flex justify-end gap-2 pt-2">
+						<Button variant="subtle" theme="gray" size="sm" @click="showAddOperationModal = false">
+							Cancel
+						</Button>
+						<Button variant="solid" theme="blue" size="sm" type="submit">
+							Save Working Step
 						</Button>
 					</div>
 				</form>
@@ -999,8 +1217,18 @@ const showAddFindingModal = ref(false);
 const showAddRequirementModal = ref(false);
 const showAddExpenseModal = ref(false);
 const showAddChecklistModal = ref(false);
+const showAddOperationModal = ref(false);
 
 // New item forms
+const newOperation = reactive({
+	operation_type: "System Blowdown & Flush",
+	area_or_equipment: "RO Unit 01",
+	duration_minutes: 30,
+	chemicals_used: "",
+	outcome: "Successful",
+	remarks: "",
+});
+
 const newReading = reactive({
 	preset: "pH",
 	parameter: "pH",
@@ -1037,10 +1265,10 @@ const newExpense = reactive({
 
 const newChecklistItem = ref("");
 
-// Computed site and coordinates
+// Computed site and coordinates (Egyptian site default)
 const siteDetails = computed(() => visit.value?.site_details || {});
-const targetLat = computed(() => siteDetails.value?.latitude || 21.5433);
-const targetLng = computed(() => siteDetails.value?.longitude || 39.1728);
+const targetLat = computed(() => siteDetails.value?.latitude || 29.9725);
+const targetLng = computed(() => siteDetails.value?.longitude || 30.9415);
 const allowedRadius = computed(() => siteDetails.value?.geofence_radius_meters || 250);
 
 // Badges & Counters
@@ -1073,10 +1301,33 @@ const tabs = computed(() => [
 	{ id: "geofence", label: "GPS Check-In", icon: "map-pin" },
 	{ id: "readings", label: "Water Tests", icon: "activity", badge: outOfRangeCount.value },
 	{ id: "checklist", label: "Checklist", icon: "check-square", badge: completedChecklistCount.value },
+	{ id: "operations", label: "Working Steps", icon: "tool", badge: visit.value?.operations?.length || 0 },
 	{ id: "findings", label: "Findings", icon: "alert-triangle", badge: visit.value?.findings?.length || 0 },
-	{ id: "requirements", label: "Spares & Chems", icon: "box", badge: visit.value?.requirements?.length || 0 },
-	{ id: "submit", label: "Summary & Sign", icon: "feather" },
+	{ id: "requirements", label: "Requests & Spares", icon: "box", badge: visit.value?.requirements?.length || 0 },
+	{ id: "submit", label: "Expenses & Sign", icon: "dollar-sign" },
 ]);
+
+function handleAddOperationSubmit() {
+	if (!newOperation.area_or_equipment.trim()) return;
+	if (!visit.value.operations) visit.value.operations = [];
+	visit.value.operations.push({
+		operation_type: newOperation.operation_type,
+		area_or_equipment: newOperation.area_or_equipment.trim(),
+		duration_minutes: parseInt(newOperation.duration_minutes) || 30,
+		chemicals_used: newOperation.chemicals_used.trim(),
+		outcome: newOperation.outcome,
+		remarks: newOperation.remarks.trim(),
+	});
+	newOperation.chemicals_used = "";
+	newOperation.remarks = "";
+	showAddOperationModal.value = false;
+	saveCurrentDraft(true);
+}
+
+function removeOperation(idx) {
+	visit.value.operations.splice(idx, 1);
+	saveCurrentDraft(true);
+}
 
 // Switch Tab with silent auto-save
 function switchTab(tabId) {
@@ -1357,7 +1608,7 @@ async function handleSubmitReport() {
 			requirements: visit.value.requirements || [],
 			expenses: visit.value.expenses || [],
 			operations: visit.value.operations || [],
-			outcome: visit.value.outcome || "Completed",
+			outcome: visit.value.outcome || "Resolved",
 			executive_summary: visit.value.executive_summary || "Water quality inspection completed.",
 			customer_rep: customerSignerName.value.trim(),
 			customer_signature: sigData,
