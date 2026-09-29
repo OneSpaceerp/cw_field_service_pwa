@@ -37,6 +37,9 @@ export const syncStore = {
 	get items() {
 		return state.items;
 	},
+	get queue() {
+		return state.items;
+	},
 	pendingCount: computed(() => state.items.length),
 
 	enqueue(action, visitId, payload) {
@@ -56,6 +59,16 @@ export const syncStore = {
 	clearQueue() {
 		state.items = [];
 		persistQueue(state.items);
+	},
+
+	removeItem(identifier) {
+		const idx = state.items.findIndex(
+			(i) => i.idempotency_key === identifier || i.id === identifier || i.visit_id === identifier
+		);
+		if (idx !== -1) {
+			state.items.splice(idx, 1);
+			persistQueue(state.items);
+		}
 	},
 
 	async syncAll() {
@@ -79,17 +92,35 @@ export const syncStore = {
 			if (res.ok) {
 				const json = await res.json().catch(() => ({}));
 				const count = state.items.length;
-				this.clearQueue();
+				if (json.message?.results && Array.isArray(json.message.results)) {
+					const failedKeys = new Set(
+						json.message.results
+							.filter((r) => !r.success)
+							.map((r) => r.idempotency_key)
+					);
+					if (failedKeys.size === 0) {
+						this.clearQueue();
+					} else {
+						state.items = state.items.filter((i) => failedKeys.has(i.idempotency_key));
+						persistQueue(state.items);
+					}
+				} else {
+					this.clearQueue();
+				}
 				return { success: true, count, results: json.message?.results };
 			} else {
 				const errText = await res.text().catch(() => "");
 				console.error("[Sync] Server sync failed:", res.status, errText);
-				return { success: false, error: `Server error ${res.status}` };
+				return { success: false, error: `Server error ${res.status}: ${errText.substring(0, 120)}` };
 			}
 		} catch (e) {
 			console.warn("[Sync] Server sync unreachable:", e);
 			return { success: false, error: e.message };
 		}
+	},
+
+	async processQueue() {
+		return this.syncAll();
 	},
 
 	initAutoSync() {
