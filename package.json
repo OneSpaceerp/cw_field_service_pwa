@@ -1,11 +1,11 @@
 {
-  "name": "cw-field-service-pwa",
+  "name": "cw_field_service_pwa",
   "version": "1.0.0",
   "description": "C-Water Mobile Field Service & Water Quality Inspection PWA",
   "private": true,
   "scripts": {
-    "build": "npm --prefix frontend install && npm --prefix frontend run build:all",
-    "dev": "npm --prefix frontend run dev"
+    "build": "cd frontend && npm run build:frappe",
+    "dev": "cd frontend && npm run dev"
   },
   "author": "Nest Software Development & C-Water",
   "license": "MIT"
