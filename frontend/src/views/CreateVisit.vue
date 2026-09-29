@@ -166,10 +166,10 @@
 						@change="handlePhotoUpload"
 					/>
 
-					<div class="flex items-center gap-2 pt-1">
+					<div class="flex items-center gap-2 pt-1 flex-wrap">
 						<button
 							type="button"
-							@click="showCameraModal = true"
+							@click="openLiveCamera"
 							class="px-4 py-2.5 bg-gradient-to-r from-sky-600 to-cyan-600 text-white rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 active:scale-95 transition-all hover:shadow-sky-500/25"
 						>
 							<FeatherIcon name="camera" class="w-4 h-4 stroke-[2.5]" />
@@ -177,16 +177,18 @@
 						</button>
 						<button
 							type="button"
-							@click="$refs.cameraInput.click()"
+							@click="cameraInput?.click()"
 							class="px-3.5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold shadow-2xs flex items-center gap-1.5 active:scale-95 transition-all hover:bg-slate-50"
+							title="Open system camera app"
 						>
-							<FeatherIcon name="video" class="w-4 h-4 text-sky-600" />
-							<span>Native</span>
+							<FeatherIcon name="smartphone" class="w-4 h-4 text-sky-600" />
+							<span>Device Cam</span>
 						</button>
 						<button
 							type="button"
-							@click="$refs.galleryInput.click()"
+							@click="galleryInput?.click()"
 							class="px-3.5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold shadow-2xs flex items-center gap-1.5 active:scale-95 transition-all hover:bg-slate-50"
+							title="Choose from photo gallery"
 						>
 							<FeatherIcon name="image" class="w-4 h-4 text-slate-500" />
 							<span>Gallery</span>
@@ -400,6 +402,7 @@ import { useRouter } from "vue-router";
 import { FeatherIcon, Dialog } from "frappe-ui";
 import { visitsData } from "@/data/visits";
 import { permissionsManager, permissionsState } from "@/utils/permissions";
+import { optimizeImage, formatBytes, fileToDataUrl } from "@/utils/image";
 import CameraModal from "@/components/CameraModal.vue";
 
 const router = useRouter();
@@ -409,6 +412,9 @@ const validationError = ref("");
 const showCustomerPicker = ref(false);
 const customerSearchQuery = ref("");
 const showCameraModal = ref(false);
+
+const cameraInput = ref(null);
+const galleryInput = ref(null);
 
 const selectedCustomer = ref(null);
 
@@ -462,19 +468,35 @@ function selectCustomer(cust) {
 	validationError.value = "";
 }
 
-function handlePhotoUpload(e) {
+function openLiveCamera() {
+	if (typeof navigator !== "undefined" && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+		showCameraModal.value = true;
+	} else if (cameraInput.value) {
+		cameraInput.value.click();
+	} else {
+		showCameraModal.value = true;
+	}
+}
+
+async function handlePhotoUpload(e) {
 	const file = e.target?.files?.[0];
 	if (!file) return;
 
-	photoFileName.value = file.name || "visit_photo.jpg";
-	photoFileSize.value = formatBytes(file.size);
+	try {
+		const rawDataUrl = await fileToDataUrl(file);
+		const optimized = await optimizeImage(rawDataUrl, 1600, 0.85);
 
-	const reader = new FileReader();
-	reader.onload = (ev) => {
-		photoPreview.value = ev.target.result;
+		photoPreview.value = optimized.dataUrl;
+		photoFileName.value = file.name || "visit_photo.jpg";
+		photoFileSize.value = optimized.formattedSize;
 		validationError.value = "";
-	};
-	reader.readAsDataURL(file);
+	} catch (err) {
+		console.warn("Photo upload processing failed:", err);
+	} finally {
+		if (e.target) {
+			e.target.value = "";
+		}
+	}
 }
 
 function handleCameraCaptured(payload) {
@@ -488,14 +510,6 @@ function removePhoto() {
 	photoPreview.value = null;
 	photoFileName.value = "";
 	photoFileSize.value = "";
-}
-
-function formatBytes(bytes) {
-	if (!bytes || bytes === 0) return "0 B";
-	const k = 1024;
-	const sizes = ["B", "KB", "MB", "GB"];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 }
 
 async function acquireLocation() {

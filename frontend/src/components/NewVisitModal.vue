@@ -182,6 +182,7 @@
 import { ref, reactive, computed, onMounted } from "vue";
 import { Dialog, FormControl, Button, FeatherIcon } from "frappe-ui";
 import { visitsData } from "@/data/visits";
+import { optimizeImage, fileToDataUrl } from "@/utils/image";
 
 const props = defineProps({
 	modelValue: { type: Boolean, default: false },
@@ -216,15 +217,19 @@ const form = reactive({
 	description: "",
 });
 
-function handleModalPhoto(e) {
+async function handleModalPhoto(e) {
 	const file = e.target?.files?.[0];
 	if (!file) return;
-	photoFileName.value = file.name || "visit_photo.jpg";
-	const reader = new FileReader();
-	reader.onload = (ev) => {
-		photoPreview.value = ev.target.result;
-	};
-	reader.readAsDataURL(file);
+	try {
+		const raw = await fileToDataUrl(file);
+		const opt = await optimizeImage(raw, 1600, 0.85);
+		photoPreview.value = opt.dataUrl;
+		photoFileName.value = file.name || "visit_photo.jpg";
+	} catch (err) {
+		console.warn("Modal photo optimization error:", err);
+	} finally {
+		if (e.target) e.target.value = "";
+	}
 }
 
 function resetForm() {
