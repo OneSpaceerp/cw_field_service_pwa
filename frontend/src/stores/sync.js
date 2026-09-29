@@ -1,5 +1,5 @@
 import { reactive, computed } from "vue";
-import { getApiUrl, getCsrfToken } from "@/data/session";
+import { getApiUrl, getAuthHeaders, getCsrfToken } from "@/data/session";
 
 const QUEUE_KEY = "cw_offline_queue";
 
@@ -72,10 +72,7 @@ export const syncStore = {
 			const res = await fetch(getApiUrl("/api/method/cw_field_service.api.sync_queued_visits"), {
 				method: "POST",
 				credentials: "include",
-				headers: {
-					"Content-Type": "application/json",
-					"X-Frappe-CSRF-Token": getCsrfToken(),
-				},
+				headers: getAuthHeaders(),
 				body: JSON.stringify({ queue_payload: JSON.stringify(payload) }),
 			});
 

@@ -5,11 +5,17 @@ export const DEFAULT_ERPNEXT_URL = "https://onespace.cw-eg.com";
 
 export function getApiBaseUrl() {
 	const saved = localStorage.getItem("cw_server_url");
-	if (saved) return saved.trim().replace(/\/$/, "");
-	if (import.meta.env.VITE_ERPNEXT_URL) return import.meta.env.VITE_ERPNEXT_URL.trim().replace(/\/$/, "");
-	if (typeof window !== "undefined" && window.location.hostname && window.location.hostname.includes("cw-eg.com")) {
+	if (saved && saved.startsWith("http") && !saved.includes("app.cw-eg.com")) {
+		return saved.trim().replace(/\/$/, "");
+	}
+	if (import.meta.env.VITE_ERPNEXT_URL) {
+		return import.meta.env.VITE_ERPNEXT_URL.trim().replace(/\/$/, "");
+	}
+	// ONLY if running directly on the ERPNext site itself (e.g. onespace.cw-eg.com/cw_field_service_pwa)
+	if (typeof window !== "undefined" && window.location.hostname === "onespace.cw-eg.com") {
 		return "";
 	}
+	// For app.cw-eg.com, localhost, Vercel, or any external client domain:
 	return DEFAULT_ERPNEXT_URL;
 }
 
@@ -34,6 +40,18 @@ export function getCsrfToken() {
 		if (token) return token;
 	} catch (_) {}
 	return window.csrf_token || "";
+}
+
+export function getAuthHeaders() {
+	const headers = {
+		"Content-Type": "application/json",
+		"Accept": "application/json",
+	};
+	const token = getCsrfToken();
+	if (token) {
+		headers["X-Frappe-CSRF-Token"] = token;
+	}
+	return headers;
 }
 
 export function sessionUser() {

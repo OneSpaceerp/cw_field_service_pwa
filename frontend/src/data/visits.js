@@ -1,6 +1,6 @@
 import { reactive } from "vue";
 import { syncStore } from "@/stores/sync";
-import { getApiUrl, getCsrfToken } from "@/data/session";
+import { getApiUrl, getAuthHeaders, getCsrfToken } from "@/data/session";
 
 const demoVisits = [
 	{
@@ -109,10 +109,7 @@ export const visitsData = {
 			const res = await fetch(getApiUrl("/api/method/cw_field_service.api.get_master_data"), {
 				method: "POST",
 				credentials: "include",
-				headers: {
-					"Content-Type": "application/json",
-					"X-Frappe-CSRF-Token": getCsrfToken(),
-				},
+				headers: getAuthHeaders(),
 			});
 			if (res.ok) {
 				const data = await res.json();
@@ -143,10 +140,7 @@ export const visitsData = {
 			const res = await fetch(getApiUrl(`/api/method/cw_field_service.api.search_customers?query=${encodeURIComponent(q)}`), {
 				method: "GET",
 				credentials: "include",
-				headers: {
-					"Content-Type": "application/json",
-					"X-Frappe-CSRF-Token": getCsrfToken(),
-				},
+				headers: getAuthHeaders(),
 			});
 			if (res.ok) {
 				const data = await res.json();
@@ -165,10 +159,7 @@ export const visitsData = {
 			const res = await fetch(getApiUrl("/api/method/cw_field_service.api.get_assigned_visits"), {
 				method: "POST",
 				credentials: "include",
-				headers: {
-					"Content-Type": "application/json",
-					"X-Frappe-CSRF-Token": getCsrfToken(),
-				},
+				headers: getAuthHeaders(),
 			});
 			if (res.ok) {
 				const data = await res.json();
@@ -189,10 +180,7 @@ export const visitsData = {
 				const res = await fetch(getApiUrl(`/api/method/cw_field_service.api.get_visit_details?visit_id=${encodeURIComponent(visitId)}`), {
 					method: "GET",
 					credentials: "include",
-					headers: {
-						"Content-Type": "application/json",
-						"X-Frappe-CSRF-Token": getCsrfToken(),
-					},
+					headers: getAuthHeaders(),
 				});
 				if (res.ok) {
 					const json = await res.json();
@@ -334,10 +322,7 @@ export const visitsData = {
 			const res = await fetch(getApiUrl("/api/method/cw_field_service.api.save_visit_draft"), {
 				method: "POST",
 				credentials: "include",
-				headers: {
-					"Content-Type": "application/json",
-					"X-Frappe-CSRF-Token": getCsrfToken(),
-				},
+				headers: getAuthHeaders(),
 				body: JSON.stringify({ visit_id: visitId, data: payload }),
 			});
 			if (res.ok) {
@@ -380,10 +365,7 @@ export const visitsData = {
 			await fetch(getApiUrl("/api/method/cw_field_service.api.check_in_visit"), {
 				method: "POST",
 				credentials: "include",
-				headers: {
-					"Content-Type": "application/json",
-					"X-Frappe-CSRF-Token": getCsrfToken(),
-				},
+				headers: getAuthHeaders(),
 				body: JSON.stringify({ visit_id: visitId, ...payload }),
 			});
 		} catch (_) {
@@ -437,10 +419,7 @@ export const visitsData = {
 			const res = await fetch(getApiUrl("/api/method/cw_field_service.api.submit_visit"), {
 				method: "POST",
 				credentials: "include",
-				headers: {
-					"Content-Type": "application/json",
-					"X-Frappe-CSRF-Token": getCsrfToken(),
-				},
+				headers: getAuthHeaders(),
 				body: JSON.stringify(payload),
 			});
 			if (res.ok) {
@@ -578,10 +557,7 @@ export const visitsData = {
 			const res = await fetch(getApiUrl("/api/method/cw_field_service.api.create_site_visit"), {
 				method: "POST",
 				credentials: "include",
-				headers: {
-					"Content-Type": "application/json",
-					"X-Frappe-CSRF-Token": getCsrfToken(),
-				},
+				headers: getAuthHeaders(),
 				body: JSON.stringify(payloadToSend),
 			});
 			if (res.ok) {
