@@ -2,7 +2,7 @@
 name = "cw_field_service_pwa"
 authors = [{ name = "Nest Software Development & C-Water", email = "info@nest-dev.com" }]
 description = "Production-grade Mobile PWA for C-Water Field Service (Frappe HRMS Reference Architecture)"
-requires-python = ">=3.14"
+requires-python = ">=3.10"
 readme = "README.md"
 dynamic = ["version"]
 dependencies = []
@@ -18,7 +18,7 @@ erpnext = ">=16.0.0,<17.0.0"
 [tool.ruff]
 line-length = 110
 indent-width = 4
-target-version = "py314"
+target-version = "py310"
 
 [tool.ruff.format]
 quote-style = "double"

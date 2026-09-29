@@ -4,7 +4,13 @@ import router from "@/router";
 export const DEFAULT_ERPNEXT_URL = "https://onespace.cw-eg.com";
 
 export function getApiBaseUrl() {
-	return localStorage.getItem("cw_server_url") || import.meta.env.VITE_ERPNEXT_URL || "";
+	const saved = localStorage.getItem("cw_server_url");
+	if (saved) return saved.trim().replace(/\/$/, "");
+	if (import.meta.env.VITE_ERPNEXT_URL) return import.meta.env.VITE_ERPNEXT_URL.trim().replace(/\/$/, "");
+	if (typeof window !== "undefined" && window.location.hostname && window.location.hostname.includes("cw-eg.com")) {
+		return "";
+	}
+	return DEFAULT_ERPNEXT_URL;
 }
 
 export function setApiBaseUrl(url) {

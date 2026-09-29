@@ -80,18 +80,19 @@ export const syncStore = {
 			});
 
 			if (res.ok) {
+				const json = await res.json().catch(() => ({}));
 				const count = state.items.length;
 				this.clearQueue();
-				return { success: true, count };
+				return { success: true, count, results: json.message?.results };
+			} else {
+				const errText = await res.text().catch(() => "");
+				console.error("[Sync] Server sync failed:", res.status, errText);
+				return { success: false, error: `Server error ${res.status}` };
 			}
 		} catch (e) {
-			console.warn("[Sync] Server sync unreachable, simulating offline drain...", e);
+			console.warn("[Sync] Server sync unreachable:", e);
+			return { success: false, error: e.message };
 		}
-
-		// Standalone simulated sync
-		const count = state.items.length;
-		this.clearQueue();
-		return { success: true, count, simulated: true };
 	},
 
 	initAutoSync() {

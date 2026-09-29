@@ -380,8 +380,19 @@
 							</div>
 							<FeatherIcon v-if="selectedCustomer?.name === c.name" name="check" class="w-4 h-4 text-sky-600 stroke-[3]" />
 						</div>
-						<p v-if="!filteredCustomers.length" class="text-center text-xs text-slate-400 py-6">
-							No customers found matching "{{ customerSearchQuery }}"
+						<div
+							v-if="customerSearchQuery.trim() && !filteredCustomers.some(c => (c.customer_name || c.name || '').toLowerCase() === customerSearchQuery.trim().toLowerCase())"
+							@click="selectCustomer({ name: customerSearchQuery.trim(), customer_name: customerSearchQuery.trim(), territory: 'All Territories' })"
+							class="p-2.5 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-100 cursor-pointer flex items-center justify-between transition-all border border-dashed border-sky-300 mt-2"
+						>
+							<div>
+								<p class="text-xs font-bold leading-snug">+ Use "{{ customerSearchQuery.trim() }}" as Customer</p>
+								<p class="text-[10px] text-sky-600">Registers customer in ERPNext</p>
+							</div>
+							<FeatherIcon name="plus" class="w-4 h-4 text-sky-600 stroke-[3]" />
+						</div>
+						<p v-if="!filteredCustomers.length && !customerSearchQuery.trim()" class="text-center text-xs text-slate-400 py-6">
+							Type a customer name to search or add
 						</p>
 					</div>
 				</div>

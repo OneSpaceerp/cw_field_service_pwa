@@ -614,9 +614,14 @@ export const visitsData = {
 					} catch (_) {}
 				}
 			} else {
+				const errText = await res.text().catch(() => "");
+				console.error("[visits] Server returned error creating visit:", res.status, errText);
+				newVisit._sync_status = "offline_pending";
 				syncStore.enqueue("create_visit", newId, payloadToSend);
 			}
-		} catch (_) {
+		} catch (err) {
+			console.warn("[visits] Network error creating visit, enqueued offline:", err);
+			newVisit._sync_status = "offline_pending";
 			syncStore.enqueue("create_visit", newId, payloadToSend);
 		}
 
