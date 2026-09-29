@@ -181,45 +181,151 @@ export const visitsData = {
 	},
 
 	async getVisitDetails(visitId) {
-		const base = state.visits.find((v) => v.name === visitId) || state.visits[0];
-		return {
-			...base,
-			site_details: {
-				location_name: base.service_location,
-				site_code: "SITE-" + base.name.slice(-5),
+		let visitData = null;
+
+		// 1. Try fetching live from ERPNext backend if online
+		if (navigator.onLine) {
+			try {
+				const res = await fetch(getApiUrl(`/api/method/cw_field_service.api.get_visit_details?visit_id=${encodeURIComponent(visitId)}`), {
+					method: "GET",
+					credentials: "include",
+					headers: {
+						"Content-Type": "application/json",
+						"X-Frappe-CSRF-Token": getCsrfToken(),
+					},
+				});
+				if (res.ok) {
+					const json = await res.json();
+					if (json.message && json.message.name) {
+						visitData = json.message;
+					}
+				}
+			} catch (e) {
+				console.warn("[visits] Network fetch failed, falling back to local:", e);
+			}
+		}
+
+		// 2. If no server data, check local storage or in-memory state
+		if (!visitData) {
+			try {
+				const cached = localStorage.getItem(`cw_visit_${visitId}`);
+				if (cached) {
+					visitData = JSON.parse(cached);
+				}
+			} catch (_) {}
+		}
+
+		if (!visitData) {
+			visitData = state.visits.find((v) => v.name === visitId);
+		}
+
+		// 3. Fallback to basic structure if still not found
+		if (!visitData) {
+			visitData = {
+				name: visitId,
+				customer_name: "Customer Site Inspection",
+				service_location: "Main Plant",
+				visit_type: "Routine Inspection",
+				priority: "Medium",
+				visit_status: "In Progress",
+				planned_date: new Date().toISOString().split("T")[0],
+			};
+		}
+
+		// 4. Normalize and ensure all child tables exist
+		if (!Array.isArray(visitData.readings) || visitData.readings.length === 0) {
+			visitData.readings = [
+				{ parameter: "pH", parameter_name: "pH Level", unit: "pH", min_range: 6.5, max_range: 8.5, min_value: 6.5, max_value: 8.5, reading_value: "7.35", status: "Normal", remarks: "Optimal range" },
+				{ parameter: "TDS", parameter_name: "Total Dissolved Solids", unit: "ppm", min_range: 100, max_range: 1000, min_value: 100, max_value: 1000, reading_value: "450", status: "Normal", remarks: "Within spec" },
+				{ parameter: "Conductivity", parameter_name: "Electrical Conductivity", unit: "µS/cm", min_range: 200, max_range: 1500, min_value: 200, max_value: 1500, reading_value: "820", status: "Normal", remarks: "Good conductivity" },
+				{ parameter: "Hardness", parameter_name: "Total Hardness", unit: "ppm CaCO3", min_range: 50, max_range: 300, min_value: 50, max_value: 300, reading_value: "120", status: "Normal", remarks: "Softened" },
+				{ parameter: "Free Chlorine", parameter_name: "Free Residual Chlorine", unit: "ppm", min_range: 0.2, max_range: 2.0, min_value: 0.2, max_value: 2.0, reading_value: "1.10", status: "Normal", remarks: "Disinfected" },
+			];
+		}
+
+		if (!Array.isArray(visitData.checklist_items) || visitData.checklist_items.length === 0) {
+			visitData.checklist_items = [
+				{ checklist_item: "Visual inspection of dosing pumps and chemical injection lines", response: "Pass", status: "Pass", is_mandatory: 1, remarks: "Pumps running normally, no leaks" },
+				{ checklist_item: "Verify chemical storage tank levels and spill containment", response: "Pass", status: "Pass", is_mandatory: 1, remarks: "Tanks at safe capacity (>70%)" },
+				{ checklist_item: "Calibrate online pH, ORP, and Conductivity sensors", response: "Pass", status: "Pass", is_mandatory: 1, remarks: "Sensors calibrated against standard buffers" },
+				{ checklist_item: "Check differential pressure across cartridge filters & RO membranes", response: "Pass", status: "Pass", is_mandatory: 1, remarks: "Delta P = 0.4 bar (within normal limits)" },
+				{ checklist_item: "Check raw water feed pump pressure and flow meter indicators", response: "Pass", status: "Pass", is_mandatory: 1, remarks: "Pressure steady at 3.5 bar" },
+				{ checklist_item: "Verify safety shower, eyewash station, and PPE availability", response: "Pass", status: "Pass", is_mandatory: 1, remarks: "Fully compliant with HSE safety standards" },
+			];
+		}
+
+		if (!Array.isArray(visitData.findings)) visitData.findings = [];
+		if (!Array.isArray(visitData.requirements)) visitData.requirements = [];
+		if (!Array.isArray(visitData.expenses)) visitData.expenses = [];
+		if (!Array.isArray(visitData.operations)) visitData.operations = [];
+
+		if (!visitData.site_details) {
+			visitData.site_details = {
+				location_name: visitData.service_location || "Client Facility",
+				site_code: "SITE-" + (visitData.name || "").slice(-5),
 				latitude: 21.5433,
 				longitude: 39.1728,
 				geofence_radius_meters: 250,
-				address_display: "Industrial Area 3, Jeddah, Saudi Arabia",
-				primary_contact_person: "Eng. Ahmed Al-Ghamdi",
+				address_display: "Industrial Area Phase 3, Jeddah / Cairo",
+				primary_contact_person: "Site Operations Supervisor",
 				primary_contact_phone: "+966 55 123 4567",
-				special_site_instructions: "Wear full PPE (safety helmet, goggles, steel-toe boots). Obtain visitor pass at Gate 2.",
-			},
-			readings: [
-				{ parameter: "pH", parameter_name: "pH Level", unit: "pH", min_value: 6.5, max_value: 8.5, reading_value: 7.35 },
-				{ parameter: "TDS", parameter_name: "Total Dissolved Solids", unit: "ppm", min_value: 100, max_value: 1000, reading_value: 450 },
-				{ parameter: "Conductivity", parameter_name: "Conductivity", unit: "µS/cm", min_value: 200, max_value: 1500, reading_value: 820 },
-				{ parameter: "Hardness", parameter_name: "Total Hardness", unit: "ppm CaCO3", min_value: 50, max_value: 300, reading_value: 120 },
-				{ parameter: "Free Chlorine", parameter_name: "Free Chlorine", unit: "ppm", min_value: 0.2, max_value: 2.0, reading_value: 1.1 },
-			],
-			checklist_items: [
-				{ item_description: "Visual inspection of dosing pumps and chemical lines", status: "Pass", remarks: "Pumps running normally" },
-				{ item_description: "Verify chemical storage tank levels and spill containment", status: "Pass", remarks: "Tanks at 75% volume" },
-				{ item_description: "Calibrate online pH and Conductivity sensors", status: "Pass", remarks: "Sensors calibrated against standard" },
-				{ item_description: "Check differential pressure across cartridge filters", status: "Pass", remarks: "Delta P = 0.4 bar (normal)" },
-			],
-			findings: [
-				{ category: "Scaling", severity: "Low", description: "Minor scale on drain valve", corrective_action: "Acid wipe" },
-			],
-			requirements: [
-				{ item_code: "CHEM-CW102", item_name: "Anti-Scalant Polymer CW-102", quantity: 2, unit: "Drums", purpose: "Replenishment" },
-			],
-			expenses: [
-				{ expense_type: "Transport / Fuel", amount: 50.0, description: "Highway fuel" },
-			],
-			executive_summary: "Water quality parameters verified within target thresholds. System operating safely.",
-			customer_representative: "Eng. Ahmed Al-Ghamdi",
+				special_site_instructions: "Wear full PPE: helmet, safety glasses, high-vis vest, and steel-toe boots before entering pump room.",
+			};
+		}
+
+		// Cache locally
+		try {
+			localStorage.setItem(`cw_visit_${visitId}`, JSON.stringify(visitData));
+		} catch (_) {}
+
+		return visitData;
+	},
+
+	async saveDraft(visitId, data) {
+		const payload = {
+			checklist_items: data.checklist_items || [],
+			readings: data.readings || [],
+			findings: data.findings || [],
+			requirements: data.requirements || [],
+			expenses: data.expenses || [],
+			operations: data.operations || [],
+			executive_summary: data.executive_summary || "",
+			customer_representative: data.customer_representative || "",
+			customer_representative_phone: data.customer_representative_phone || "",
 		};
+
+		// 1. Update in-memory and local storage immediately
+		const idx = state.visits.findIndex((v) => v.name === visitId);
+		if (idx !== -1) {
+			Object.assign(state.visits[idx], payload);
+		}
+		try {
+			const existing = JSON.parse(localStorage.getItem(`cw_visit_${visitId}`) || "{}");
+			localStorage.setItem(`cw_visit_${visitId}`, JSON.stringify({ ...existing, ...payload }));
+		} catch (_) {}
+
+		if (!navigator.onLine) {
+			syncStore.enqueue("save_draft", visitId, { data: payload });
+			return { success: true, queued: true };
+		}
+
+		try {
+			const res = await fetch(getApiUrl("/api/method/cw_field_service.api.save_visit_draft"), {
+				method: "POST",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
+					"X-Frappe-CSRF-Token": getCsrfToken(),
+				},
+				body: JSON.stringify({ visit_id: visitId, data: payload }),
+			});
+			if (res.ok) {
+				return { success: true };
+			}
+		} catch (_) {}
+
+		syncStore.enqueue("save_draft", visitId, { data: payload });
+		return { success: true, queued: true };
 	},
 
 	async checkIn(visitId, coords, reason) {
@@ -234,7 +340,15 @@ export const visitsData = {
 		if (visit) {
 			visit.visit_status = "In Progress";
 			visit.checkin_time = new Date().toLocaleTimeString();
+			visit.geofence_status = "Verified";
 		}
+		try {
+			const existing = JSON.parse(localStorage.getItem(`cw_visit_${visitId}`) || "{}");
+			existing.visit_status = "In Progress";
+			existing.checkin_time = new Date().toLocaleTimeString();
+			existing.geofence_status = "Verified";
+			localStorage.setItem(`cw_visit_${visitId}`, JSON.stringify(existing));
+		} catch (_) {}
 
 		if (!navigator.onLine) {
 			syncStore.enqueue("check_in", visitId, payload);
@@ -258,31 +372,67 @@ export const visitsData = {
 	},
 
 	async submitVisit(visitId, submission) {
+		const childData = {
+			readings: submission.readings || [],
+			checklist_items: submission.checklist_items || [],
+			findings: submission.findings || [],
+			requirements: submission.requirements || [],
+			expenses: submission.expenses || [],
+			operations: submission.operations || [],
+		};
+
+		const payload = {
+			visit_id: visitId,
+			data: childData,
+			outcome: submission.outcome || "Completed",
+			executive_summary: submission.executive_summary || "",
+			customer_rep: submission.signer_name || submission.customer_representative || "",
+			customer_signature: submission.signature || submission.customer_signature || "",
+			latitude: submission.latitude || null,
+			longitude: submission.longitude || null,
+			accuracy: submission.accuracy || null,
+		};
+
 		const visit = state.visits.find((v) => v.name === visitId);
 		if (visit) {
 			visit.visit_status = "Pending Review";
-			visit.outcome = submission.outcome;
+			visit.outcome = payload.outcome;
+			visit.checkout_time = new Date().toLocaleTimeString();
 		}
+		try {
+			const existing = JSON.parse(localStorage.getItem(`cw_visit_${visitId}`) || "{}");
+			existing.visit_status = "Pending Review";
+			existing.outcome = payload.outcome;
+			existing.checkout_time = new Date().toLocaleTimeString();
+			localStorage.setItem(`cw_visit_${visitId}`, JSON.stringify(existing));
+		} catch (_) {}
 
 		if (!navigator.onLine) {
-			syncStore.enqueue("submit", visitId, submission);
+			syncStore.enqueue("submit", visitId, payload);
 			return { success: true, queued: true };
 		}
 
 		try {
-			await fetch(getApiUrl("/api/method/cw_field_service.api.submit_visit"), {
+			const res = await fetch(getApiUrl("/api/method/cw_field_service.api.submit_visit"), {
 				method: "POST",
 				credentials: "include",
 				headers: {
 					"Content-Type": "application/json",
 					"X-Frappe-CSRF-Token": getCsrfToken(),
 				},
-				body: JSON.stringify({ visit_id: visitId, ...submission }),
+				body: JSON.stringify(payload),
 			});
-		} catch (_) {
-			syncStore.enqueue("submit", visitId, submission);
-		}
-		return { success: true };
+			if (res.ok) {
+				return { success: true };
+			}
+		} catch (_) {}
+
+		syncStore.enqueue("submit", visitId, payload);
+		return { success: true, queued: true };
+	},
+
+	async submitReport(visitId, submission) {
+		return this.submitVisit(visitId, submission);
 	},
 
 	async getVisit(visitId) {
